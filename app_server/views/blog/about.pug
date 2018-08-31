@@ -1,0 +1,95 @@
+extends layout
+block stylesheet
+    link(rel="stylesheet" href="/stylesheets/blog/about.css")
+block content
+    .container-fluid.mb-3.text-center
+        .row.justify-content-md-center.mt-md-3
+            .col-lg-8 
+                .about-you.mt-3
+                    .leadin.pt-3.text-center
+                        h1 This is about you and me!
+                        .my-2 Hi 
+                            i.fas.fa-hand-peace.mx-1(style="color: #ff2f2f" data-fa-transform="grow-10")
+                            |  &nbsp; my name is  
+                            em Paul
+                            |  &nbsp; , would you like to tell me your name:
+                            input.text-center#visitor-name(type="text" placeholder="name" maxlength="14") 
+
+        .row.justify-content-md-center.align-items-center.mt-md-3
+            .my-3.my-md-0.font-weight-bold.col-lg-4.col-md-6.par.py-md-5
+                    span.visitor-name.text-capitalize 
+                    |  &nbsp; Have you ever landed to a website that wouldn't differentiate between your mobile phone and a laptop? I mean the one just like this 
+
+            .col-lg-4.col-md-5 
+                img.img-fluid.unresponsive(src="/images/about/2.png" alt="an un responsive website")  
+        
+
+    
+
+        .row.justify-content-md-center.align-items-center.mt-md-3 
+            .my-3.font-weight-bold.col-md-6.par.order-md-1 Or maybe you have used that web app that could not load after so long: ooohh
+        
+            .col-md-6.order-md-0
+                img.img-fluid.load-img(id="load-img" src="/images/about/load-page.gif" alt="a slow web app")
+
+        .row.justify-content-md-center.mt-md-3.align-items-center
+            .col-md-6.col-lg-7(id="callto-action") 
+                .font-weight-bold.my-3.par(id="hire-me") 
+                    span.visitor-name.text-capitalize 
+                    |&nbsp; Why can't you make all those long, boring and streneous processes that your customers or employees are doing short enjoyable and straightforward , Understand more your customers, give them what they want whenever they want it and no matter where they are!
+            
+                .callto-action-text.font-weight-bold.p-2 For that you need a website or webapp built around the user not the porduct And that is what you will get from me. Give them the experience they are after. 
+            
+            .col-md-6.col-lg-5
+                .d-flex.flex-column.align-items-center 
+                    .overlays 
+                        .overlay 
+                            .overlay-content short enjoyable and straightforward processes  
+                        img(src="/images/about/enjoyable.jpg") 
+                    .overlays 
+                        .overlay 
+                            .overlay-content Understand more your customers and know about them  
+                        img(src="/images/about/info.jpg") 
+                    .overlays 
+                        .overlay 
+                            .overlay-content  what they want whenever they want it and no matter where they are!  
+                        img(src="images/about/everywhere.jpg") 
+                
+        .row.justify-content-md-center.mt-md-3
+            .col-md-5.col-xl-4
+                .contact.py-2.px-1.text-center 
+                    h2.mb-2.font-weight-bold Reach out to me and we can find out what next!
+                    .contact-labels
+                        label  
+                            i.fas.fa-phone-square(style="color: #071d34")  
+                            | &nbsp;
+                        label +250 788 467 808  
+                
+                    .contact-labels
+                        label  
+                            i.fas.fa-envelope(style="color: #071d34") 
+                            | &nbsp;
+                        label vabimana@gmail.com  
+                    .mt-1
+                        label(for="message-input") Or leave a message here!  
+                        .input-group.my-1 
+                            .input-group-prepend
+                                .input-group-text
+                                    i.fas.fa-envelope(style="color: #071d34") 
+                            input.form-control(type="email" name="email" id="email" placeholder="your email") 
+                    
+                        textarea.form-control.rounded-0(id="message-input" rows="4")  
+                        button.btn.btn-dark.mt-2 Leave it  
+            .col-md-6.col-xl-5.about-me 
+                h2.my-3 Just a little about me now: 
+                .row.justify-content-md-center.align-items-center
+                    .col-sm-6
+                        img.img-fluid.img-thumbnail.my-profile(src="/images/profile-2.jpg " alt="av paul ")
+                    .px-md-2.col-sm-6.py-2  avPaul, I am a software enginneer and business addict, when i am not making the internet a better place to live i am searching for another great book to read
+                        |&nbsp;
+                        i.fas.fa-smile.fa-lg(style="color: gold ")
+                        |&nbsp; or sweeting more in the gym   
+block scripts
+    script( src="/javascripts/blog/about.js")
+
+

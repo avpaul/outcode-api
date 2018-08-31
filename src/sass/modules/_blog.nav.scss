@@ -1,0 +1,12 @@
+nav.blog {
+    justify-content: space-between;
+    .brand-logo img {
+        height: 3rem;
+    }
+    ul {
+        height: 80%;
+        a {
+            font-size: 1.4rem;
+        }
+    }
+}

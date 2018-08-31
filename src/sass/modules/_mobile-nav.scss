@@ -1,0 +1,57 @@
+nav.blog~.sidenav-overlay {
+    top: 56px;
+}
+
+.sidenav#mobile-nav {
+    margin-top: 56px;
+    background-color: $primary-color;
+    border-top: 2px $white solid;
+    .user-image {
+        height: 116px;
+        width: 116px;
+        border: none;
+    }
+    .user-name {
+        font-size: 40px;
+        color: $secondary-color;
+    }
+    .user-work {
+        color: $white;
+        font-size: 18px;
+        line-height: 1.4;
+    }
+    // social media follow buttons
+    .follow-btns {
+        display: flex;
+        justify-content: space-between;
+        padding-left: 20px;
+        padding-right: 20px;
+        .btn-floating {
+            width: 56px;
+            height: 56px;
+            i {
+                font-size: 32px;
+                line-height: 50px;
+            }
+        }
+        #follow-facebook {
+            background-color: $fb-color;
+        }
+        #follow-twitter {
+            background-color: $tw-color;
+        }
+        #follow-instagram {
+            background-color: $ins-color;
+        }
+        #follow-linkedin {
+            background-color: $li-color;
+        }
+    }
+    ul.nav {
+        a {
+            color: $white;
+            font-size: 24px;
+            font-weight: 300;
+        }
+    }
+}

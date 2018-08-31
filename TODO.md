@@ -1,0 +1,7 @@
+# TODO for  **Av-Paul Personal Blog** project.
+| Done  | Task                                 | Section                                                                                                   | Description               | Priority | AddedOn |
+| :---: | ------------------------------------ | --------------------------------------------------------------------------------------------------------- | ------------------------- | :------: | :-----: |
+| [ ]   | Add deleteDraft modal and toast      | [articleEditor.js](/src/js/articleEditor.js) -> [newpost.pug](/app_server/views/admin/newpost.pug)        | In document               | 1        | 27/08   |
+| [ ]   | Add a modal for publish comfirmation | [articleEditor.js](/src/js/articleEditor.js) -> [newpost.pug](/app_server/views/admin/newpost.pug)        | In document               | 1        | 27/08   |
+| [ ]   | Change Tooltips font-size            | [newpost.pug](/app_server/views/admin/newpost.pug) -> [_tooltip.scss](/src/sass/components/_tooltip.scss) | Decrease font-size        | 1        | 27/08   |
+| [ ]   | Add a Black/Dark waves effect        | [newpost.pug](/app_server/views/admin/newpost.pug) -> [_tooltip.scss](/src/sass/components/_tooltip.scss) | To match navigation color | 2        | 27/08   |

@@ -1,0 +1,29 @@
+footer {
+    .d-flex {
+        background-color: $primary-color;
+        padding: 6px 0;
+    }
+    a[href] {
+        color: $white;
+        font-weight: 400;
+        font-size: 1.3rem;
+    }
+    .copyright-year {
+        font-size: 24px;
+        font-weight: 400;
+        margin: 0 10px;
+        @media #{$medium-and-up} {
+            font-weight: 700;
+            margin: 0 20px;
+        }
+    }
+    .copyright-logo {
+        color: $secondary-color;
+    }
+    img {
+        height: 30px;
+        @media #{$medium-and-up} {
+            height: 40px;
+        }
+    }
+}
