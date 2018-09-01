@@ -6,11 +6,9 @@
     "private": true,
     "scripts": {
         "start": "node ./bin/www",
-        "build:css": "node-sass -g --include-path src/sass src/sass/main.scss dist/build/main.css --output-style compact",
-        "watch:css": "npm run build:css -- -w",
+        "start:nodemon": "nodemon --watch app_api --watch app_server --watch app.js --ext js",
         "build:dev": "webpack --env dev",
-        "build:prod": "webpack --env prod",
-        "sass": "npm run build:css && npm run watch:css"
+        "build:prod": "webpack --env prod"
     },
     "engines": {
         "node": "~9.8.0",
@@ -27,6 +25,7 @@
         "material-datetime-picker": "^2.4.0",
         "mongoose": "^5.2.5",
         "morgan": "~1.9.0",
+        "multer": "^1.3.1",
         "passport": "^0.4.0",
         "passport-local": "^1.0.0",
         "pug": "^2.0.3",

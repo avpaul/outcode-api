@@ -1,6 +1,5 @@
-import { fromEvent, merge, Observable } from 'rxjs';
-import { map, startWith, scan, debounceTime, switchMap } from 'rxjs/operators';
-import Autosave from '@ckeditor/ckeditor5-autosave/src/autosave';
+import { fromEvent, merge, Observable, interval } from 'rxjs';
+import { map, startWith, scan, debounceTime, switchMap, withLatestFrom, throttle, throttleTime } from 'rxjs/operators';
 
 export default class ArticleEditor {
     /**
@@ -22,7 +21,7 @@ export default class ArticleEditor {
                 closeBtn: c.closeEdit,
                 previewBtn: c.previewEdit,
                 publishBtn: c.publishEdit,
-                postTiltle: c.postTitle,
+                postTitle: c.postTitle,
                 wordCount: c.wordCount,
                 lastSave: c.lastSave,
                 editStatus: c.editStatus,
@@ -95,9 +94,22 @@ export default class ArticleEditor {
         let picker;
 
         // editor
-        d.create($(c.editorContainer)[0])
+        d.create($(c.editorContainer)[0], {
+                autosave: {
+                    save(editor) {
+                        _this.setPostData(editor.getData());
+                    }
+                },
+                ckfinder: {
+                    uploadUrl: '/uploads/editor'
+                }
+            })
             .then(editor => {
                 _this.editor = editor;
+                // Add an UploadAdapter
+                // editor.plugins.get('FileRepository').createUploadAdapter = function(loader) {
+                //     return _this.UploadAdapter(loader);
+                // };
                 //initialize tooltipps
                 $('.tooltipped').tooltip();
             })
@@ -168,17 +180,12 @@ export default class ArticleEditor {
         let _p = pickerDropdown;
         let _M = M;
         let _$ = $;
+
         const picker = new _M()
-            .on('submit', (value) => {
-
-
-
-            })
             .on('close', () => {
                 //Trigger a close event on the picker dropdown
                 _c.trigger('close');
             });
-
         return picker;
     }
 
@@ -278,6 +285,31 @@ export default class ArticleEditor {
     }
 
     /**
+     * CKEditor upload adapter for uploading images
+     */
+    UploadAdapter(loader) {
+        // Save Loader instance to update upload progress.
+        this.loader = loader;
+
+        function upload() {
+            // Update loader's progress.
+            server.onUploadProgress(data => {
+                loader.uploadTotal = data.total;
+                loader.uploaded = data.uploaded;
+            });
+
+            // Return promise that will be resolved when file is uploaded.
+            return server.upload(loader.file);
+        }
+
+        function abort() {
+            // Reject promise returned from upload() method.
+            server.abortUpload();
+        }
+        return { upload, abort };
+    }
+
+    /**
      * A utility function for watching DOM content change.
      */
     DOMObserver(node, config) {
@@ -299,18 +331,43 @@ export default class ArticleEditor {
      * Wrapper for the Filereader.
      */
     readResource(url) {
-        let result = Observable.create(sub => {
-            let reader = new FileReader();
-            reader.onload = () => {
-                if (reader.readyState === reader.DONE) {
-                    sub.next(reader.result);
-                } else {
-                    sub.error(reader.error);
+        let isOffline = !navigator.onLine;
+        if (isOffline) {
+            // Use Filereader and flag the return with offlineRead
+            let res = Observable.create(sub => {
+                let reader = new FileReader();
+                reader.onload = () => {
+                    if (reader.readyState === reader.DONE) {
+                        sub.next(reader.result);
+                    } else {
+                        sub.error(reader.error);
+                    }
                 }
-            }
-            reader.readAsDataURL(url);
-        });
-        return result;
+                reader.readAsDataURL(url);
+            });
+            return res;
+        } else {
+            // Send it to the server and return an url to it
+            let res = new Observable((obs) => {
+                let data = new FormData();
+                data.set('upload', url);
+                data.set('settings', 'featuredImg');
+
+                let xhr = new XMLHttpRequest();
+                xhr.open('POST', '/uploads/editor', true);
+                xhr.responseType = 'json';
+                xhr.onload = function() {
+                    if (xhr.readyState === xhr.DONE) {
+                        obs.next(xhr.response.url);
+                    }
+                }
+                xhr.onerror = function(err) {
+                    obs.error(err);
+                }
+                xhr.send(data);
+            });
+            return res;
+        }
     }
 
     /**
@@ -337,6 +394,28 @@ export default class ArticleEditor {
     getWordCount() {}
 
     /**
+     * Passed to ckeditor auto-save plugin.
+     * @param {string} data 
+     */
+    setPostData(data) {
+        // Use an observable to throttle.
+        let _d = new Observable(obs => {
+            obs.next(data);
+        }).pipe(
+            throttleTime(1000),
+        );
+
+        // Subscribe to the observable and return a promise when data has bess saved.
+        _d.subscribe(val => {
+            console.log(val);
+            // this.saveEdit().data(val);
+        });
+        return new Promise((resolve, reject) => {
+            resolve()
+        });
+    }
+
+    /**
      * Returns an object of the post settings
      * i.e:{
      *    title
@@ -350,157 +429,172 @@ export default class ArticleEditor {
      *    featuredImage 
      * }
      */
-    getPostSettings(postTitle, settingsUI, fileReader, M, picker) {
-        let _M = M;
+    getPostSettings() {
+        let _this = this;
+
+        let _M = _this.M;
+        let _cs = _this.cache.settings
         let _s = {
-            title: postTitle,
-            front: settingsUI.stickFront,
-            review: settingsUI.pendingReview,
-            categories: settingsUI.category,
-            tags: settingsUI.tags,
-            shareOn: settingsUI.shareOn,
-            excerpt: settingsUI.excerpt,
-            featuredImageUploader: settingsUI.featuredImgUploader
+            title: _this.cache.postTitle,
+            front: _cs.stickFront,
+            review: _cs.pendingReview,
+            categories: _cs.category,
+            tags: _cs.tags,
+            shareOn: _cs.shareOn,
+            excerpt: _cs.excerpt,
+            featuredImageUploader: _cs.featuredImgUploader
         };
 
         // Create Observables for each setting the combine/merge them together.
 
-        let title,
-            stickFront,
-            pendingReview,
-            tags,
-            category,
-            excerpt,
-            featuredImage,
-            shareOn,
-            publishDate,
-            subject;
+        function _title() {
+            return fromEvent(_s.title, 'input').pipe(
+                map((e) => {
+                    return { 'title': e.target.innerText }
+                }),
+                debounceTime(1000),
+                startWith({ 'title': undefined })
+            )
+        }
 
-        title = fromEvent(_s.title, 'input').pipe(
-            map((e) => {
-                return { 'title': e.target.innerText }
-            }),
-            debounceTime(1000),
-            startWith({ 'title': undefined })
-        );
+        function _stickFront() {
+            return fromEvent(_s.front, 'change').pipe(
+                map((e) => {
+                    return { 'stickFront': e.target.checked }
+                }),
+                startWith({ 'stickFront': false })
+            )
+        }
 
-        stickFront = fromEvent(_s.front, 'change').pipe(
-            map((e) => {
-                return { 'stickFront': e.target.checked }
-            }),
-            startWith({ 'stickFront': false })
-        );
+        function _pendingReview() {
+            return fromEvent(_s.review, 'change').pipe(
+                map((e) => {
+                    return { 'pendingReview': e.target.checked }
+                }),
+                startWith({ 'pendingReview': false })
+            )
+        }
 
-        pendingReview = fromEvent(_s.review, 'change').pipe(
-            map((e) => {
-                return { 'pendingReview': e.target.checked }
-            }),
-            startWith({ 'pendingReview': false })
-        );
+        function _category() {
+            return fromEvent(_s.categories, 'change').pipe(
+                map(e => {
+                    return { category: [e.target.name] }
+                }),
+                scan((acc, cur) => {
+                    let key = cur.category[0];
+                    if (acc.category.includes(key)) {
+                        let res = { category: [] };
+                        res.category = acc.category.filter((_c) => _c !== key)
+                        return res;
+                    } else {
+                        acc.category.push(key);
+                        return acc;
+                    }
 
-        category = fromEvent(_s.categories, 'change').pipe(
-            map(e => {
-                return { category: [e.target.name] }
-            }),
-            scan((acc, cur) => {
-                let key = cur.category[0];
-                if (acc.category.includes(key)) {
-                    let res = { category: [] };
-                    res.category = acc.category.filter((_c) => _c !== key)
-                    return res;
-                } else {
-                    acc.category.push(key);
-                    return acc;
-                }
+                }),
+                startWith({ 'category': undefined })
+            )
+        }
 
-            }),
-            startWith({ 'category': undefined })
-        );
+        function _tags() {
+            return fromEvent(_s.tags, 'change').pipe(
+                map(() => {
+                    let _tags = [];
+                    let data = _M.Chips.getInstance(_s.tags).chipsData;
+                    data.forEach(d => {
+                        _tags.push(d.tag);
+                    });
+                    return { 'tags': _tags };
+                }),
+                startWith({ 'tags': undefined })
+            )
+        }
 
-        tags = fromEvent(_s.tags, 'change').pipe(
-            map(() => {
-                let _tags = [];
-                let data = M.Chips.getInstance(_s.tags).chipsData;
-                data.forEach(d => {
-                    _tags.push(d.tag);
-                });
-                return { 'tags': _tags };
-            }),
-            startWith({ 'tags': undefined })
-        );
+        function _shareOn() {
+            return fromEvent(_s.shareOn, 'change').pipe(
+                map(e => {
+                    return { shareOn: [e.target.name] };
+                }),
+                scan((acc, cur) => {
+                    let key = cur.shareOn[0];
+                    if (acc.shareOn.includes(key)) {
+                        let res = { shareOn: [] };
+                        res.shareOn = acc.shareOn.filter((_c) => _c !== key)
+                        return res;
+                    } else {
+                        acc.shareOn.push(key);
+                        return acc;
+                    }
 
-        shareOn = fromEvent(_s.shareOn, 'change').pipe(
-            map(e => {
-                return { shareOn: [e.target.name] };
-            }),
-            scan((acc, cur) => {
-                let key = cur.shareOn[0];
-                if (acc.shareOn.includes(key)) {
-                    let res = { shareOn: [] };
-                    res.shareOn = acc.shareOn.filter((_c) => _c !== key)
-                    return res;
-                } else {
-                    acc.shareOn.push(key);
-                    return acc;
-                }
+                }),
+                startWith({ shareOn: undefined })
+            )
+        }
 
-            }),
+        function _excerpt() {
+            return fromEvent(_s.excerpt, 'input').pipe(
+                map(e => {
+                    return { 'excerpt': e.target.value };
+                }),
+                debounceTime(1000),
+                startWith({ 'excerpt': undefined })
+            )
+        }
 
-            startWith({ shareOn: undefined })
-        );
+        function _publishDate(picker) {
+            return fromEvent(picker, 'submit').pipe(
+                map((e) => {
 
-        excerpt = fromEvent(_s.excerpt, 'input').pipe(
-            map(e => {
-                return { 'excerpt': e.target.value };
-            }),
-            debounceTime(1000),
-            startWith({ 'excerpt': undefined })
-        );
+                    // Emit  value{mm,HH,DD,MM,YYYY} 
+                    let minutes = e.format('mm');
+                    let hour = e.format('HH');
+                    let day = e.format('DD');
+                    let month = e.format('MM');
+                    let year = e.format('YYYY');
 
-        publishDate = fromEvent(picker, 'submit').pipe(
-            map((e) => {
+                    let serverValue = {
+                        minute: minutes,
+                        hour: hour,
+                        day: day,
+                        month: month,
+                        year: year
+                    }
+                    return { 'publishDate': serverValue };
+                }),
+                startWith({ 'publishDate': 'immediately' })
+            )
+        }
 
-                // Emit  value{mm,HH,DD,MM,YYYY} 
-                let minutes = e.format('mm');
-                let hour = e.format('HH');
-                let day = e.format('DD');
-                let month = e.format('MM');
-                let year = e.format('YYYY');
+        function _featuredImage() {
+            return fromEvent(_s.featuredImageUploader, 'change').pipe(
+                switchMap(function(e) {
+                    let _o;
+                    let file = e.target.files[0];
+                    _o = _this.readResource(file);
+                    return _o.pipe(map(val => { return { 'featuredImage': val } }));
+                }),
+                startWith({ 'featuredImage': undefined })
+            )
+        }
 
-                let serverValue = {
-                    minute: minutes,
-                    hour: hour,
-                    day: day,
-                    month: month,
-                    year: year
-                }
-                return { 'publishDate': serverValue };
-            }),
-            startWith({ 'publishDate': 'immediately' })
-        );
-
-        featuredImage = fromEvent(_s.featuredImageUploader, 'change').pipe(
-            switchMap(function(e) {
-                let _o;
-                let file = e.target.files[0];
-                _o = fileReader(file);
-                return _o.pipe(map(val => { return { 'featuredImage': val } }));
-            }),
-            startWith({ 'featuredImage': undefined })
-        );
-
-        subject = merge(
-            title,
-            stickFront,
-            pendingReview,
-            tags,
-            category,
-            excerpt,
-            shareOn,
-            featuredImage,
-            publishDate
-        );
-        return subject;
+        function _all(dp) {
+            let subject = merge(
+                _title(),
+                _stickFront(),
+                _pendingReview(),
+                _tags(),
+                _category(),
+                _excerpt(),
+                _shareOn(),
+                _featuredImage(),
+                _publishDate(dp)
+            );
+            return subject;
+        }
+        return {
+            all: _all,
+            ftImg: _featuredImage
+        }
     }
 
     /**
@@ -508,33 +602,55 @@ export default class ArticleEditor {
      * Saved content are: post title,editor content and post settings.
      * First time all are saved, for next time only changed contents are saved. 
      */
-    saveEdit(datePicker) {
-        let config = [
-            this.cache.postTiltle,
-            this.cache.settings,
-            this.readResource,
-            this.M,
-            datePicker
-        ];
-        let settings = this.getPostSettings(...config);
-        settings.subscribe(
-            (value) => {
-                console.log(value);
+    saveEdit() {
+
+        let isOffline = true | !window.navigator.onLine;
+        let $ = this.jQuery;
+        let url;
+        let timestamp;
+        let settings = {};
+
+        function _saveSettings(datePicker) {
+
+            let _this = this;
+            let _c = this.cache;
+
+            let _o = _this.getPostSettings().all(datePicker);
+            _o.subscribe(
+                (value) => {
+                    // console.log(Reflect.has(value, 'featuredImage'));
+                    // console.log(typeof value.featuredImage === 'string');
+                    // if (Reflect.has(value, 'featuredImage' && typeof value.featuredImage === 'string')) {
+                    // console.log('inseting');
+                    // _this.updateUI().featuredImg(_c.settings.featuredImg, value.featuredImage)
+                    // }
+                    Object.assign(settings, value);
+                    console.log(settings);
+                }
+            )
+        }
+
+        function _saveEditorData(editorData) {
+            let _date = {
+                editorData: editorData,
+                postSettings: settings
+            };
+            if (isOffline) {
+                // The user is offline, use localStorage
+                if (window.localStorage) {
+                    localStorage.newPost = _date;
+                    return { newData: data, lastSave: timestamp }
+                }
+            } else {
+                // Send an Ajax post
+                $.post(url, data);
             }
-        );
-        // let $ = this.jQuery;
-        // let url;
-        // let timestamp;
-        // if (!window.navigator.onLine) {
-        //     // The user is offline, use localStorage
-        //     if (window.localStorage) {
-        //         localStorage.newPost = data;
-        //         return { newData: data, lastSave: timestamp }
-        //     }
-        // } else {
-        //     // Send an Ajax post
-        //     $.post(url, data);
-        // }
+        }
+
+        return {
+            settings: _saveSettings,
+            editorData: _saveEditorData,
+        }
     }
 
     /**
@@ -575,11 +691,17 @@ export default class ArticleEditor {
             container.html(ICON_ELT);
             scheduleCont.text(date).parent().removeClass('d-none');
         }
+
+        function _featuredImg(imgCont, path) {
+            console.log(imgCont, path);
+            imgCont.src = path;
+        }
         return {
             status: _status,
             count: _count,
             timer: _timer,
-            date: _date
+            date: _date,
+            featuredImg: _featuredImg
         };
     }
 
@@ -613,6 +735,11 @@ export default class ArticleEditor {
         c.publishBtn.on('click', getHandler('publish').bind(_this));
         cs.dateContainer.on('dateChange'), getHandler('dateChange').bind(null, cs.datePicker, cs.dateContainer);
         cs.featuredImgUploaderBtn.on('click', () => { cs.featuredImgUploader.click() });
-        _this.saveEdit(picker);
+        _this.getPostSettings().ftImg().subscribe(img => {
+            if (typeof img.featuredImage === 'string') {
+                cs.featuredImg.attr('src', img.featuredImage);
+            }
+        })
+        _this.saveEdit().settings.call(_this, picker);
     }
 }

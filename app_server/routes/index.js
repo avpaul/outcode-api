@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 var blogCtrl = require('../controller/blog');
 var admnCtrl = require('../controller/admin');
+var editorCtrl = require('../controller/editor');
+
 
 var ejwt = require('express-jwt');
 var auth = ejwt({
@@ -29,5 +31,9 @@ router.get('/admin/comments', admnCtrl.commentsCtrl);
 // handle post methods here
 router.post('/admin', admnCtrl.login);
 router.post('/admin/signup', admnCtrl.signup);
+
+// Editor
+// router.post('/uploads/editor', upload.single('upload'), editorCtrl.uploads);
+router.post('/uploads/editor', editorCtrl.uploads);
 
 module.exports = router;

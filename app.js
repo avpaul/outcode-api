@@ -13,6 +13,24 @@ var passport = require('passport');
 require('./app_api/model/db');
 require('./app_api/config/passport');
 
+// Express Multer
+var multer = require('multer');
+var storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'dist/images/uploads/')
+    },
+    filename: (req, file, cb) => {
+        cb(null,
+            file.fieldname + '-' + Date.now() + '.' + file.mimetype.split('/')[1]
+        )
+    }
+});
+
+var upload = multer({
+    /**dest: 'uploads/'*/
+    storage: storage
+});
+
 //WEBPACK HRM
 var webpack = require('webpack');
 var webpackConfig = require('./webpack.config.babel.js')('dev');
@@ -66,6 +84,7 @@ if (process.env.mode === 'dev') {
 
 // INITIALIZE PASSPORT
 // app.use(passport.initialize());
+app.post('/uploads/editor', upload.single('upload'));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
@@ -73,6 +92,7 @@ app.use('/api', apiRouter);
 app.use('/json', (req, res) => {
     res.redirect('http://localhost:3001/' + req.originalUrl);
 });
+
 
 
 // catch 404 and forward to error handler
