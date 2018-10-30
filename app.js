@@ -36,7 +36,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'dist')));
 
-if (process.env.mode === 'dev') {
+if (process.env.mode === 'prod') {
     // ADD BROWSER-SYNC AS A MIDDLEWARE
     if (true) {
         var browserSync = require('browser-sync');
