@@ -10,42 +10,36 @@ html(lang="en")
         link(rel="icon" href="/images/favicon-wb-96.png" sizes="96 96" type="image/png")
         link(rel="stylesheet" href="/build/main.css")
         title= title
-    body.login
-        nav
-            .nav-wrapper
-                a.brand-logo.waves-effect.waves-classic(href="/admin") 
+    body
+        .login
+            nav
+                a.waves-effect.waves-classic.brand-logo(href="/") 
                     img(src="/images/blog-logo.svg", alt="", srcset="")
-    
-        div
-            .flex-center
-                form()
-                    h2 Hello! Sign In
-                    .row
-                        .input-field.col-12
-                            input#email(type="email" )
-                            label(for="email").text-capitalize Your Email
-                        .input-field.col-12
-                            input#password(type="password")
-                            label(for="password").text-capitalize Your Password
-                        .col-12
-                            btn.btn#signIn Sign me in
-                        .col-12
-                            p
-                                a(href="#") Create your account now!
-                            p
-                                a(href="#") Forgot your Password or Email?
-        footer.fixed-bottom
-            .row
-                .col-12
-                    div Hire me 
-                .col-12
-                    div Designed with much 
-                        i.fas.fa-heart
-                        |&nbsp; in Gisenyi
         
+            .form-container.pt-5
+                    form()
+                        h2 Hello! 
+                        .row
+                            .input-field.col-12
+                                input.validate#user-email(type="email" )
+                                label(for="user-email").text-capitalize Your email
+                                span.helper-text(data-wrong="wrong!" data-success="correct!")
+                            .input-field.col-12
+                                input.validate#user-password(type="password")
+                                label(for="user-password").text-capitalize Your password
+                                span.helper-text(data-wrong="wrong!" data-success="correct!")
+                            .col-12
+                                btn.btn#signIn.waves-effect.waves-ripple Sign me in
+            footer
+                .white-text Designed with much 
+                    i.mdi.mdi-heart.materialize-red-text
+                    |&nbsp; in Gisenyi &nbsp;
+                    img(src="/images/rda.jpeg", alt="")
+        
+        include ../_cookiesConset
+
         script(type="text/javascript" src="/build/vendors~main.chunk.js")
         script(type="text/javascript" src="/build/editor.chunk.js")
-        script(type="text/javascript" src="/build/icons.chunk.js")
         script(type="text/javascript" src="/build/jquery.chunk.js")
         script(type="text/javascript" src="/build/materialize.chunk.js")
         script(type="text/javascript" src="/build/popper.chunk.js")

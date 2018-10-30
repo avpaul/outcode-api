@@ -1,10 +1,16 @@
-@import "login";
 @import "global";
-@import "_footer";
+@import "cookies-conset";
+@import "footer";
 @import "admin.nav";
+@import "login";
+@import "errorpage";
+@import "admin.sidenav";
+@import "admin.posts";
 @import "admin.newpost";
+@import "genericModal";
 @import "admin.metrics";
 //blog
 @import "blog.nav";
+@import "blog.home";
 @import "mobile-nav";
 @import "blog.article";

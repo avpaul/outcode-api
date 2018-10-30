@@ -1,0 +1,39 @@
+.posts {
+    .container-fluid {
+        margin-left: 70px;
+        width: calc(100% - 70px)
+    }
+    .card {
+        border-radius: 0;
+        margin-left: 10px;
+        width: 300;
+        max-height: 340px;
+        .card-title {
+            margin: .8rem .9rem;
+            font-size: 20px;
+        }
+        img {
+            border-radius: 0;
+            min-height: 200px;
+            max-height: 210px;
+        }
+        .card-action {
+            max-height: 68px
+        }
+        .card-reveal {
+            .card-title {
+                margin: 0;
+            }
+            .card-reveal-close {
+                position: absolute;
+                right: 0;
+                top: -.5rem;
+                font-size: 2rem;
+                color: $primary-color
+            }
+            p {
+                color: $text-color
+            }
+        }
+    }
+}

@@ -18,5 +18,23 @@ nav {
     .btn-icon {
         height: 54px;
         line-height: 54px;
+        i {
+            vertical-align: middle;
+            margin-right: .4rem;
+            &::before {
+                font-size: 28px;
+            }
+        }
+        span {
+            font-size: 18px;
+            display: inline-block;
+            line-height: inherit;
+            height: inherit;
+        }
+    }
+    #user-settings {
+        a {
+            color: $text-color;
+        }
     }
 }

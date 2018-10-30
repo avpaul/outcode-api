@@ -1,52 +1,133 @@
 extends layout
-block stylesheet
 block content
-    .container-fluid.p-cont.mx-md-auto
-        .d-flex.justify-content-around.my-2.filters(id="page-filters")
-            a.btn.mr-2
-                i.fas.fa-dollar-sign.fa-2x(data-fa-transform="up-1" style="color: #071d34 ")
-                i.fas.fa-dollar-sign.fa-2x(data-fa-transform="up-1" style="color: #071d34 ")
-            a.btn.mr-2
-                i.fas.fa-desktop.fa-2x(data-fa-transform="up-1" style="color: #071d34")
-            a.btn.mr-2
-                i.fas.fa-globe.fa-2x(data-fa-transform="up-1" style="color: #071d34")
+    - var dFormater = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }
+    - var dFormaterMobile = { year: 'numeric', month: 'long', day: 'numeric' }
+    
+    include _nav
+    include _sidenav
 
-        .articles.justify-content-center 
-            a.article-thumb.p-1.pl-2.my-2.rounded.mx-md-2(href="/article/2345")
-                div.art-img
-                    img.img-fluid(src="/images/design.jpg") 
-                div.thumb-title
-                    h2 Tech startup way: the case of Rwanda
-                div
-                    .article-category.d-inline-block
-                        i.fas.fa-dollar-sign(style="color: #071d34 ")
-                        i.fas.fa-dollar-sign(style="color: #071d34 ")
-                    .d-inline-block.ml-3#publication-date
-                        i.fas.fa-calendar-alt(style="color: #071d34 ")
-                        |&nbsp; 24 Apr 2018
-            section.article-thumb.p-1.pl-2.my-2.rounded.mx-md-2
-                div.art-img
-                    img.img-fluid(src="/images/design.jpg") 
-                div.thumb-title
-                    h2 Tech startup way: the case of Rwanda
-                div
-                    .article-category.d-inline-block
-                        i.fas.fa-dollar-sign(style="color: #071d34 ")
-                        i.fas.fa-dollar-sign(style="color: #071d34 ")
-                    .d-inline-block.ml-3#publication-date
-                        i.fas.fa-calendar-alt(style="color: #071d34 ")
-                        |&nbsp; 24 Apr 2018
-            section.article-thumb.p-1.pl-2.my-2.rounded.mx-md-2
-                div.art-img
-                    img.img-fluid(src="/images/design.jpg") 
-                div.thumb-title
-                    h2 Tech startup way: the case of Rwanda
-                div
-                    .article-category.d-inline-block
-                        i.fas.fa-dollar-sign(style="color: #071d34 ")
-                        i.fas.fa-dollar-sign(style="color: #071d34 ")
-                    .d-inline-block.ml-3#publication-date
-                        i.fas.fa-calendar-alt(style="color: #071d34 ")
-                        |&nbsp; 24 Apr 2018
-           
+    .home
+        .for-all
+            .lead-ad 
+                img.lead-ad-img(src="/images/avpaul-blog-ad.png")
+                button.btn.lead-ad-action A business owner?
+                
+            .articles
+                .hide-on-med-and-down.articles-header
+                    .articles-header-text.text-capitalize recent articles
+                    .articles-header-line
+                .articles_stickFront
+                    .card.card-flyover.stickFront-article
+                        .card-image
+                            img(src= main.featuredImage, alt="", srcset="")
+                        .card-content
+                            a.card-title(href='/blog/'+main.title.toLowerCase().replace(/(\s)/g, (w) => '-')+'?id='+main.id)= main.title
+                            p= main.excerpt 
+                            .d-flex.justify-content-between.suggested-article-actions
+                                    .mdi.mdi-clock.hide-on-med-and-down #{new Date(main.publicationDate).toLocaleDateString('en-US',dFormater)}
+                                    .mdi.mdi-clock.hide-on-med-and-up #{new Date(main.publicationDate).toLocaleDateString('en-US',dFormaterMobile)}
+                                    a.mdi.mdi-arrow-right(href='/blog/'+main.title.toLowerCase().replace(/(\s)/g, (w) => '-')+'?id='+main.id)
+                .articles_nonsticky
+                    each post in posts
+                        .card.card-flyover
+                            .card-image
+                                img(src= post.featuredImage, alt="", srcset="")
+                            .card-content
+                                a.card-title(href='/blog/'+post.title.toLowerCase().replace(/(\s)/g, (w) => '-')+'?id='+post.id)= post.title
+                                p= post.excerpt 
+                                .d-flex.justify-content-between.suggested-article-actions
+                                        .mdi.mdi-clock.hide-on-med-and-down #{new Date(post.publicationDate).toLocaleDateString('en-US',dFormater)}
+                                        .mdi.mdi-clock.hide-on-med-and-up #{new Date(post.publicationDate).toLocaleDateString('en-US',dFormaterMobile)}
+                                        a.mdi.mdi-arrow-right(href='/blog/'+post.title.toLowerCase().replace(/(\s)/g, (w) => '-')+'?id='+post.id)
 
+        .hide-on-med-and-down.user-content
+            .d-flex.align-items-center.justify-content-between.pt-3.mx-5
+                img.rounded-circle.img-thumbnail.user-image(src="/images/me-13.jpg", alt="")
+                .text-right
+                    .user-name.text-capitalize av paul
+                    .user-work.text-capitalize web developer
+                    .user-work UI/UX Designer
+            .user-social
+                .text-right.user-social-declaration i'am social
+                .social-btns
+                    button.z-depth-2.btn-floating#follow-facebook 
+                            i.mdi.mdi-facebook
+                    button.z-depth-2.btn-floating#follow-twitter
+                            i.mdi.mdi-twitter
+                    button.z-depth-2.btn-floating#follow-instagram
+                            i.mdi.mdi-instagram
+                    button.z-depth-2.btn-floating#follow-linkedin
+                            i.mdi.mdi-linkedin
+
+            .socialFeed-heading
+                .socialFeed-heading-text From social media
+                .socialFeed-heading-line
+            .socialFeeds
+                .socialFeed.socialFeed_twitter
+                    .socialFeed_header
+                        .socialFeed_user
+                            a.socialFeed_username(href="#") PaulAv
+                            a.socialFeed_userhandle(href="#") @av_paul
+                        .socialFeed_icon.mdi.mdi-twitter
+                    .socialFeed_content
+                        img.socialFeed_image(src="/images/persona.jpg", alt="", srcset="")
+                        .socialFeed_title How well do you know about your customers?
+                        a.socialFeed_link(href="#") bitly.io/3093reoilyr
+                    .socialFeed_footer
+                        .socialFeed_footer_time 10hrs ago
+                        .socialFeed_footer_react
+                            a.socialFeed_footer_comment(href="#")
+                                svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
+                                    path(d="M256 32C114.6 32 0 125.1 0 240c0 47.6 19.9 91.2 52.9 126.3C38 405.7 7 439.1 6.5 439.5c-6.6 7-8.4 17.2-4.6 26S14.4 480 24 480c61.5 0 110-25.7 139.1-46.3C192 442.8 223.2 448 256 448c141.4 0 256-93.1 256-208S397.4 32 256 32zm0 368c-26.7 0-53.1-4.1-78.4-12.1l-22.7-7.2-19.5 13.8c-14.3 10.1-33.9 21.4-57.5 29 7.3-12.1 14.4-25.7 19.9-40.2l10.6-28.1-20.6-21.8C69.7 314.1 48 282.2 48 240c0-88.2 93.3-160 208-160s208 71.8 208 160-93.3 160-208 160z")
+                            a.socialFeed_footer_share(href="#")
+                                svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512")
+                                    path(d="M629.657 343.598L528.971 444.284c-9.373 9.372-24.568 9.372-33.941 0L394.343 343.598c-9.373-9.373-9.373-24.569 0-33.941l10.823-10.823c9.562-9.562 25.133-9.34 34.419.492L480 342.118V160H292.451a24.005 24.005 0 0 1-16.971-7.029l-16-16C244.361 121.851 255.069 96 276.451 96H520c13.255 0 24 10.745 24 24v222.118l40.416-42.792c9.285-9.831 24.856-10.054 34.419-.492l10.823 10.823c9.372 9.372 9.372 24.569-.001 33.941zm-265.138 15.431A23.999 23.999 0 0 0 347.548 352H160V169.881l40.416 42.792c9.286 9.831 24.856 10.054 34.419.491l10.822-10.822c9.373-9.373 9.373-24.569 0-33.941L144.971 67.716c-9.373-9.373-24.569-9.373-33.941 0L10.343 168.402c-9.373 9.373-9.373 24.569 0 33.941l10.822 10.822c9.562 9.562 25.133 9.34 34.419-.491L96 169.881V392c0 13.255 10.745 24 24 24h243.549c21.382 0 32.09-25.851 16.971-40.971l-16.001-16z")
+                            a.socialFeed_footer_like(href="#")
+                                svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
+                                    path(d="M458.4 64.3C400.6 15.7 311.3 23 256 79.3 200.7 23 111.4 15.6 53.6 64.3-21.6 127.6-10.6 230.8 43 285.5l175.4 178.7c10 10.2 23.4 15.9 37.6 15.9 14.3 0 27.6-5.6 37.6-15.8L469 285.6c53.5-54.7 64.7-157.9-10.6-221.3zm-23.6 187.5L259.4 430.5c-2.4 2.4-4.4 2.4-6.8 0L77.2 251.8c-36.5-37.2-43.9-107.6 7.3-150.7 38.9-32.7 98.9-27.8 136.5 10.5l35 35.7 35-35.7c37.8-38.5 97.8-43.2 136.5-10.6 51.1 43.1 43.5 113.9 7.3 150.8z")
+                .socialFeed.socialFeed_facebook
+                    .socialFeed_header
+                        .socialFeed_user
+                            a.socialFeed_username(href="#") PaulAv
+                        .socialFeed_icon.mdi.mdi-facebook
+                    .socialFeed_content
+                        img.socialFeed_image(src="/images/persona.jpg", alt="", srcset="")
+                        .socialFeed_title How well do you know about your customers?
+                        a.socialFeed_link(href="#") bitly.io/3093reoilyr
+                    .socialFeed_footer
+                        .socialFeed_footer_time 10hrs ago
+                        .socialFeed_footer_react
+                            a.socialFeed_footer_comment(href="#")
+                                svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
+                                    path(d="M256 32C114.6 32 0 125.1 0 240c0 47.6 19.9 91.2 52.9 126.3C38 405.7 7 439.1 6.5 439.5c-6.6 7-8.4 17.2-4.6 26S14.4 480 24 480c61.5 0 110-25.7 139.1-46.3C192 442.8 223.2 448 256 448c141.4 0 256-93.1 256-208S397.4 32 256 32zm0 368c-26.7 0-53.1-4.1-78.4-12.1l-22.7-7.2-19.5 13.8c-14.3 10.1-33.9 21.4-57.5 29 7.3-12.1 14.4-25.7 19.9-40.2l10.6-28.1-20.6-21.8C69.7 314.1 48 282.2 48 240c0-88.2 93.3-160 208-160s208 71.8 208 160-93.3 160-208 160z")
+                            a.socialFeed_footer_share(href="#")
+                                svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
+                                    path(d="M352 320c-22.608 0-43.387 7.819-59.79 20.895l-102.486-64.054a96.551 96.551 0 0 0 0-41.683l102.486-64.054C308.613 184.181 329.392 192 352 192c53.019 0 96-42.981 96-96S405.019 0 352 0s-96 42.981-96 96c0 7.158.79 14.13 2.276 20.841L155.79 180.895C139.387 167.819 118.608 160 96 160c-53.019 0-96 42.981-96 96s42.981 96 96 96c22.608 0 43.387-7.819 59.79-20.895l102.486 64.054A96.301 96.301 0 0 0 256 416c0 53.019 42.981 96 96 96s96-42.981 96-96-42.981-96-96-96z")
+                            a.socialFeed_footer_like(href="#")
+                                svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
+                                    path(d="M458.4 64.3C400.6 15.7 311.3 23 256 79.3 200.7 23 111.4 15.6 53.6 64.3-21.6 127.6-10.6 230.8 43 285.5l175.4 178.7c10 10.2 23.4 15.9 37.6 15.9 14.3 0 27.6-5.6 37.6-15.8L469 285.6c53.5-54.7 64.7-157.9-10.6-221.3zm-23.6 187.5L259.4 430.5c-2.4 2.4-4.4 2.4-6.8 0L77.2 251.8c-36.5-37.2-43.9-107.6 7.3-150.7 38.9-32.7 98.9-27.8 136.5 10.5l35 35.7 35-35.7c37.8-38.5 97.8-43.2 136.5-10.6 51.1 43.1 43.5 113.9 7.3 150.8z")
+                .socialFeed.socialFeed_instagram
+                    .socialFeed_header
+                        .socialFeed_user
+                            a.socialFeed_username(href="#") PaulAv
+                            a.socialFeed_userhandle(href="#") avpaul
+                        .socialFeed_icon.mdi.mdi-instagram
+                    .socialFeed_content
+                        img.socialFeed_image(src="/images/persona.jpg", alt="", srcset="")
+                        .socialFeed_title How well do you know about your customers?
+                        a.socialFeed_link(href="#") bitly.io/3093reoilyr
+                    .socialFeed_footer
+                        .socialFeed_footer_time 10hrs ago
+                        .socialFeed_footer_react
+                            a.socialFeed_footer_comment(href="#")
+                                svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
+                                    path(d="M256 32C114.6 32 0 125.1 0 240c0 47.6 19.9 91.2 52.9 126.3C38 405.7 7 439.1 6.5 439.5c-6.6 7-8.4 17.2-4.6 26S14.4 480 24 480c61.5 0 110-25.7 139.1-46.3C192 442.8 223.2 448 256 448c141.4 0 256-93.1 256-208S397.4 32 256 32zm0 368c-26.7 0-53.1-4.1-78.4-12.1l-22.7-7.2-19.5 13.8c-14.3 10.1-33.9 21.4-57.5 29 7.3-12.1 14.4-25.7 19.9-40.2l10.6-28.1-20.6-21.8C69.7 314.1 48 282.2 48 240c0-88.2 93.3-160 208-160s208 71.8 208 160-93.3 160-208 160z")
+                            a.socialFeed_footer_share(href="#")
+                                svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512")
+                                    path(d="M352 320c-22.608 0-43.387 7.819-59.79 20.895l-102.486-64.054a96.551 96.551 0 0 0 0-41.683l102.486-64.054C308.613 184.181 329.392 192 352 192c53.019 0 96-42.981 96-96S405.019 0 352 0s-96 42.981-96 96c0 7.158.79 14.13 2.276 20.841L155.79 180.895C139.387 167.819 118.608 160 96 160c-53.019 0-96 42.981-96 96s42.981 96 96 96c22.608 0 43.387-7.819 59.79-20.895l102.486 64.054A96.301 96.301 0 0 0 256 416c0 53.019 42.981 96 96 96s96-42.981 96-96-42.981-96-96-96z")
+                            a.socialFeed_footer_like(href="#")
+                                svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512")
+                                    path(d="M458.4 64.3C400.6 15.7 311.3 23 256 79.3 200.7 23 111.4 15.6 53.6 64.3-21.6 127.6-10.6 230.8 43 285.5l175.4 178.7c10 10.2 23.4 15.9 37.6 15.9 14.3 0 27.6-5.6 37.6-15.8L469 285.6c53.5-54.7 64.7-157.9-10.6-221.3zm-23.6 187.5L259.4 430.5c-2.4 2.4-4.4 2.4-6.8 0L77.2 251.8c-36.5-37.2-43.9-107.6 7.3-150.7 38.9-32.7 98.9-27.8 136.5 10.5l35 35.7 35-35.7c37.8-38.5 97.8-43.2 136.5-10.6 51.1 43.1 43.5 113.9 7.3 150.8z")
+                    
+    include _footer
+    include ../_cookiesConset

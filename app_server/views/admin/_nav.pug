@@ -4,18 +4,18 @@ nav
     .d-inline-block.flex-grow-1
     .d-flex.align-items-center.h-100
         a.btn-icon.white-text.text-uppercase(href="/admin/posts/new") 
-            i.mdi.mdi-36px.mdi-shape-rectangle-plus
-            |&nbsp;new post
+            i.mdi.mdi-shape-rectangle-plus
+            span new post
         button.btn-icon.white-text 
             i.mdi.mdi-36px.mdi-bell
         button.btn-icon.white-text 
             i.mdi.mdi-36px.mdi-email
         btn.btn-icon.dropdown-trigger(data-target="user-settings")
-            img.img-thumbnail.user-image.rounded-circle(src="/images/me-sm.jpg", alt="User")
+            img.img-thumbnail.user-image.rounded-circle(src="/images/me-fam.jpg", alt="User")
     
     //- user settings dropdown
-    .dropdown-content#user-settings
-        a(href="") messages
-        a(href="") notifications
-        a(href="") settings
-        a(href="") log out
+    .dropdown-content#user-settings.no-autoinit
+        a.btn(href="") messages
+        a.btn(href="") notifications
+        a.btn(href="") settings
+        a.btn(href="") log out

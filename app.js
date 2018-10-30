@@ -10,26 +10,10 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var passport = require('passport');
-require('./app_api/model/db');
-require('./app_api/config/passport');
+var Boom = require('boom');
+require('./app_server/model/db');
+require('./app_server/config/passport');
 
-// Express Multer
-var multer = require('multer');
-var storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'dist/images/uploads/')
-    },
-    filename: (req, file, cb) => {
-        cb(null,
-            file.fieldname + '-' + Date.now() + '.' + file.mimetype.split('/')[1]
-        )
-    }
-});
-
-var upload = multer({
-    /**dest: 'uploads/'*/
-    storage: storage
-});
 
 //WEBPACK HRM
 var webpack = require('webpack');
@@ -37,9 +21,8 @@ var webpackConfig = require('./webpack.config.babel.js')('dev');
 var compiler = webpack(webpackConfig);
 
 
-var indexRouter = require('./app_server/routes/index');
-var usersRouter = require('./app_api/routes/users');
-var apiRouter = require('./app_api/routes/index');
+var indexRoutes = require('./app_server/routes/index');
+var adminRoutes = require('./app_server/routes/admin');
 
 var app = express();
 
@@ -63,6 +46,12 @@ if (process.env.mode === 'dev') {
             files: ['./app_server/routes', './app_server/controller', './app_api'],
             logConnections: true,
             tunnel: true,
+            ghostMode: {
+                clicks: true,
+                forms: true,
+                scroll: true
+            },
+            browser: 'google chrome',
             plugins: [{
                 module: "bs-html-injector",
                 options: {
@@ -83,40 +72,36 @@ if (process.env.mode === 'dev') {
 }
 
 // INITIALIZE PASSPORT
-// app.use(passport.initialize());
-app.post('/uploads/editor', upload.single('upload'));
+app.use(passport.initialize());
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/api', apiRouter);
-app.use('/json', (req, res) => {
-    res.redirect('http://localhost:3001/' + req.originalUrl);
-});
 
+app.use('/', indexRoutes);
+app.use('/admin', adminRoutes);
 
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    next(createError(404));
-});
-
-app.use(function(err, req, res, next) {
-    if (err.name === 'UnauthorizedError') {
-        // res.redirect('/admin');
-        res.status(401);
-        res.json({ "message": err.name + ": " + err.message });
-    }
+    next(Boom.notFound('That one was not found!'));
 });
 
 // error handler
 app.use(function(err, req, res, next) {
     // set locals, only providing error in development
-    res.locals.message = err.message;
-    res.locals.error = req.app.get('env') === 'development' ? err : {};
-
+    // res.locals.message = err.message;
+    // res.locals.error = req.app.get('env') === 'development' ? err : {};
     // render the error page
-    res.status(err.status || 500);
-    res.render('error');
+    if (Boom.isBoom(err)) {
+        res.status(err.output.statusCode || 500).render('error', { error: err.output.payload });
+    } else if (err.status === 500) {
+        console.log(err);
+    } else {
+        res.status(err.status || 500).render('error', {
+            error: {
+                statusCode: err.status,
+                message: err.message
+            }
+        });
+    }
 });
 
 module.exports = app;

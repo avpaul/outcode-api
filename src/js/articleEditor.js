@@ -1,5 +1,7 @@
-import { fromEvent, merge, Observable, interval } from 'rxjs';
-import { map, startWith, scan, debounceTime, switchMap, withLatestFrom, throttle, throttleTime } from 'rxjs/operators';
+import { fromEvent, merge, Observable } from 'rxjs';
+import { map, scan, debounceTime, switchMap, throttleTime } from 'rxjs/operators';
+import Moment from 'moment';
+import CookieReader from './cookieReader';
 
 export default class ArticleEditor {
     /**
@@ -10,48 +12,50 @@ export default class ArticleEditor {
      * @param {Object} dateTimePicker 
      * @param {string} fromURL 
      */
-    constructor(cache, Materialize, ckEditor, dateTimePicker, fromURL = 'posts') {
+    constructor(cache, Materialize, ckEditor, dateTimePicker, isUpdate, updateId, fromURL = 'posts') {
         // first, cache the ui elemets to be used later
         let c = cache;
         this.cache = {
-                editorContainer: c.editor,
-                sidenavTrigger: c.sidenavTrigger,
-                HTMLTrigger: c.htmlTab,
-                HTMLContainer: c.htmlContainer,
-                closeBtn: c.closeEdit,
-                previewBtn: c.previewEdit,
-                publishBtn: c.publishEdit,
-                postTitle: c.postTitle,
-                wordCount: c.wordCount,
-                lastSave: c.lastSave,
-                editStatus: c.editStatus,
-                settings: {
-                    deleteBtn: c.deleteEdit,
-                    datePicker: c.datePicker,
-                    dateContainer: c.dateContainer,
-                    datePickerContainer: c.datepickerDropDown,
-                    stickFront: c.stickFront,
-                    pendingReview: c.pendingReview,
-                    // category: [
-                    //     c.category_bsns,
-                    //     c.category_tech,
-                    //     c.category_others
-                    // ],
-                    category: c.category,
-                    tags: c.tags,
-                    featuredImg: c.featuredImg,
-                    featuredImgUploader: c.featuredImgUploader,
-                    featuredImgUploaderBtn: c.featuredImgUploaderBtn,
-                    // shareOn: [
-                    //     c.shareOn_facebook,
-                    //     c.shareOn_twitter,
-                    //     c.shareOn_insta
-                    // ],
-                    shareOn: c.shareOn,
-                    excerpt: c.postExcerp
-                }
+            editorContainer: c.editor,
+            sidenavTrigger: c.sidenavTrigger,
+            HTMLTrigger: c.htmlTab,
+            HTMLContainer: c.htmlContainer,
+            closeBtn: c.closeEdit,
+            previewBtn: c.previewEdit,
+            publishBtn: c.publishEdit,
+            postTitle: c.postTitle,
+            wordCount: c.wordCount,
+            lastSave: c.lastSave,
+            editStatus: c.editStatus,
+            settings: {
+                accordion: c.accordion,
+                deleteBtn: c.deleteEdit,
+                genericModalYes: c.genericModalYes,
+                genericModalNo: c.genericModalNo,
+                genericModalTemplate: c.genericModalTemplate,
+                genericModal: c.genericModal,
+                datePicker: c.datePicker,
+                dateContainer: c.dateContainer,
+                datePickerContainer: c.datepickerDropDown,
+                stickFront: c.stickFront,
+                pendingReview: c.pendingReview,
+
+                category: c.category,
+                tags: c.tags,
+                featuredImg: c.featuredImg,
+                featuredImgUploader: c.featuredImgUploader,
+                featuredImgUploaderBtn: c.featuredImgUploaderBtn,
+
+                shareOn: c.shareOn,
+                excerpt: c.postExcerp
             }
-            // On close URL
+        };
+        // Save status flag
+        this._status = '';
+        // isPostUpdate
+        this._isPostUpdate = isUpdate;
+        this._updateId = updateId;
+        // On close URL
         let origin = window.location.origin;
         this.onCloseURL = new URL(`admin/${fromURL}`, origin);
         // check if jquery was loaded and assign it to a class property
@@ -92,6 +96,8 @@ export default class ArticleEditor {
         let M = this.M;
         let _this = this;
         let picker;
+        _this.saver = _this.saveEdit();
+        _this.postSettings = _this.getPostSettings();
 
         // editor
         d.create($(c.editorContainer)[0], {
@@ -101,15 +107,12 @@ export default class ArticleEditor {
                     }
                 },
                 ckfinder: {
-                    uploadUrl: '/uploads/editor'
+                    uploadUrl: '/admin/media/upload',
                 }
             })
             .then(editor => {
                 _this.editor = editor;
-                // Add an UploadAdapter
-                // editor.plugins.get('FileRepository').createUploadAdapter = function(loader) {
-                //     return _this.UploadAdapter(loader);
-                // };
+                editor.model.document.on('change:data', () => { _this.cache.lastSave.trigger('resetTimer') });
                 //initialize tooltipps
                 $('.tooltipped').tooltip();
             })
@@ -122,16 +125,47 @@ export default class ArticleEditor {
          * use M when an instance is neede i.e: for picker dropdown
          **/
         $(c.sidenavTrigger).sidenav({ edge: 'right' });
-        let pickerInstance = M.Dropdown.init(cs.datePicker, {
+        cs.accordion.collapsible({
+            onOpenStart: (e) => {
+                let i = $(e)[0].children[0].children[0];
+                i.classList.remove('mdi-chevron-down');
+                i.classList.add('mdi-chevron-up');
+            },
+            onCloseStart: (e) => {
+                let i = $(e)[0].children[0].children[0];
+                i.classList.remove('mdi-chevron-up');
+                i.classList.add('mdi-chevron-down');
+            },
+        });
+        M.Dropdown.init(cs.datePicker, {
             closeOnClick: false,
             constrainWidth: false,
-            alignment: 'right'
+            alignment: 'right',
+            onCloseStart: () => {
+                if (_this._picker.isOpen) {
+                    _this._picker.close();
+                }
+            }
         });
-        $(cs.tags).chips({
+        let itag = M.Chips.init(cs.tags, {
             placeholder: 'Tag here',
             secondaryPlaceholder: '+Tag',
             minLength: 1,
-            limit: 5
+            limit: 5,
+            onChipAdd: () => {
+                let _d = [];
+                itag[0].chipsData.forEach(t => {
+                    _d.push(t.tag)
+                });
+                cs.tags.trigger($.Event('value', { d: _d }))
+            },
+            onChipDelete: () => {
+                let _d = [];
+                itag[0].chipsData.forEach(t => {
+                    _d.push(t.tag)
+                });
+                cs.tags.trigger($.Event('value', { d: _d }))
+            }
         });
         $(cs.excerpt).characterCounter();
 
@@ -139,10 +173,7 @@ export default class ArticleEditor {
         M.AutoInit();
 
         // Initialize date picker and pas its instance to bindui
-        picker = _this.initPicker(cs.datePickerContainer, cs.dateContainer, _this.picker, _this.jQuery);
-
-        //Initialize DOMObserver for tags.
-        _this.DOMObserver(cs.tags[0], { childList: true });
+        _this._picker = _this.initPicker(cs.datePickerContainer, cs.dateContainer, _this.picker, _this.jQuery);
 
         //Call bindUI 
         // Create an event objects
@@ -169,7 +200,11 @@ export default class ArticleEditor {
             value: _this.updateUI().date
         }]
 
-        _this.bindUI(c, events, picker);
+        _this.bindUI(c, events, _this._picker);
+        // Get and set initial data(old data) if its an update
+        if (_this._isPostUpdate) {
+            _this._UpdatePost.call(_this)
+        }
     }
 
     /**
@@ -177,9 +212,7 @@ export default class ArticleEditor {
      */
     initPicker(containerBtn, pickerDropdown, M, $) {
         let _c = containerBtn;
-        let _p = pickerDropdown;
         let _M = M;
-        let _$ = $;
 
         const picker = new _M()
             .on('close', () => {
@@ -194,11 +227,14 @@ export default class ArticleEditor {
      */
     showPicker(btn, dropdown, scheduleCont, p) {
         let _this = this;
-        p.open();
+        _this._picker.on('submit', (e) => {
+            _this.updateUI().date(btn, scheduleCont, p.value);
+        });
+        _this._picker.open();
         dropdown.on('close', e => {
             let instance = this.M.Dropdown.getInstance($('.datepickerdropdown-trigger'));
             instance.close();
-            _this.updateUI().date(btn, scheduleCont, p.value);
+
         });
     }
 
@@ -208,9 +244,8 @@ export default class ArticleEditor {
      */
     closeEditor() {
         let _this = this;
-        let status = _this.getPostSettings();
-        if (status !== 'saved') {
-            _this.saveEdit();
+        if (_this._status !== 'saved') {
+            _this.saver.editorData();
         }
         window.location.assign(_this.onCloseURL);
     }
@@ -222,16 +257,49 @@ export default class ArticleEditor {
      * and delete the uploaded or saved(in cache) ressources i.e: images.
      */
     deleteDraft() {
-
+        let _this = this;
+        let c = _this.cache.settings;
+        let isPublished = CookieReader.getItem('isPublished') || false;
+        if (isPublished) {
+            // _this.M.toast({ html: 'Published posts can be deleted in posts section' })
+            // Delete or archive the post
+        } else {
+            let id = CookieReader.getItem('editingPostID');
+            let ins = M.Modal.init(c.genericModal, { opacity: 0, dismissible: false, endingTop: '60%' });
+            ins[0].open();
+            c.genericModalYes.on('click', () => {
+                let jq = _this.jQuery.ajax(`http://localhost:3000/admin/posts/delete?id=${id}`, {
+                    method: 'DELETE',
+                    dataType: 'json',
+                });
+                jq.then(r => {
+                    console.log(r);
+                    if (r.deleted === true) {
+                        window.location.assign(_this.onCloseURL);
+                    }
+                });
+                ins[0].close();
+            });
+            c.genericModalNo.on('click', () => {
+                ins[0].close();
+            });
+        }
     }
 
     /**
      * Opens up a preview window, with the editor saved content.
      * Check status if not saved do it then open up a new tab with article url.
-     * Works online or on localhost only. 
      */
     previewEdit() {
-
+        let _this = this;
+        if (_this._status !== 'saved') {
+            _this.saver.editorData();
+        }
+        let id = CookieReader.getItem('editingPostID');
+        let title = (_this.saver.DATA().title.toLowerCase()).replace(/(\s)/g, (w) => '-');
+        // Post URL format avpaul.me/article/here-goes-the-title?id=201811052301 
+        let postUrl = new URL(`${title}?id=${id}`, 'http://localhost:3000/admin/posts/preview/');
+        window.open(postUrl.href);
     }
 
     /** 
@@ -248,16 +316,40 @@ export default class ArticleEditor {
      *  6.excerpt(with valid character count)
      */
     publishPost() {
-
-    }
-
-    /**
-     * Returns edited(true) & and a timestamp for last save when the editor content is newer than the saved content.
-     * On edit save the status is saved, on edit a changed event is fired to update the status.
-     * Return an observable value which evaluates to saved/edited and a timestamp for last save.
-     */
-    getEditStatus() {
-        return 'saved';
+        let _this = this;
+        let c = _this.cache.settings;
+        let isPublished = CookieReader.getItem('isPublished') || false;
+        if (isPublished) {
+            // The post is already published dont care about this
+        } else {
+            let id = CookieReader.getItem('editingPostID');
+            c.genericModalTemplate.text('Do you want to publish this post?');
+            let ins = M.Modal.init(c.genericModal, { opacity: 0, dismissible: false, endingTop: '60%' });
+            c.genericModalYes.on('click', () => {
+                console.log('cl');
+                // let pd = _this.saver.DATA();
+                // check if conditions are met
+                let jq = _this.jQuery.ajax(`http://localhost:3000/admin/posts/publish/?id=${id}&status=publish`, {
+                    method: 'POST',
+                    dataType: 'json',
+                });
+                jq.then(r => {
+                    if (r.published === true) {
+                        let title = (_this.saver.DATA().title.toLowerCase()).replace(/(\s)/g, (w) => '-');
+                        // Post URL format avpaul.me/article/here-goes-the-title?id=201811052301 
+                        let postUrl = new URL(`${title}?id=${r.id}`, 'http://localhost:3000/blog/');
+                        console.log(postUrl);
+                        window.open(postUrl.href);
+                        // window.location.assign(postUrl.href);
+                    }
+                });
+                ins[0].close();
+            });
+            ins[0].open();
+            c.genericModalNo.on('click', () => {
+                ins[0].close();
+            });
+        }
     }
 
     /**
@@ -276,116 +368,33 @@ export default class ArticleEditor {
                 }
                 return `${s}\n`;
             });
-
             container.text(text);
         }
-
         (data === '<p>&nbsp;</p>') ? container.text('<p>Nothing to show now!</p>'): format(data);
 
-    }
-
-    /**
-     * CKEditor upload adapter for uploading images
-     */
-    UploadAdapter(loader) {
-        // Save Loader instance to update upload progress.
-        this.loader = loader;
-
-        function upload() {
-            // Update loader's progress.
-            server.onUploadProgress(data => {
-                loader.uploadTotal = data.total;
-                loader.uploaded = data.uploaded;
-            });
-
-            // Return promise that will be resolved when file is uploaded.
-            return server.upload(loader.file);
-        }
-
-        function abort() {
-            // Reject promise returned from upload() method.
-            server.abortUpload();
-        }
-        return { upload, abort };
-    }
-
-    /**
-     * A utility function for watching DOM content change.
-     */
-    DOMObserver(node, config) {
-        let _target = node;
-        let _o;
-        let _fn = function(list) {
-            for (let _e of list) {
-                if (_e.type === 'childList') {
-                    let event = new Event('change');
-                    _target.dispatchEvent(event);
-                }
-            }
-        }
-        _o = new MutationObserver(_fn);
-        _o.observe(_target, config);
     }
 
     /**
      * Wrapper for the Filereader.
      */
     readResource(url) {
-        let isOffline = !navigator.onLine;
-        if (isOffline) {
-            // Use Filereader and flag the return with offlineRead
-            let res = Observable.create(sub => {
-                let reader = new FileReader();
-                reader.onload = () => {
-                    if (reader.readyState === reader.DONE) {
-                        sub.next(reader.result);
-                    } else {
-                        sub.error(reader.error);
-                    }
+        // Send it to the server and return an url to it
+        let res = Observable.create((obs) => {
+            var data = new FormData();
+            data.set("upload", url);
+            var xhr = new XMLHttpRequest();
+            xhr.withCredentials = true;
+            xhr.addEventListener("readystatechange", function() {
+                if (this.readyState === 4) {
+                    let r = JSON.parse(this.response);
+                    obs.next(r.url);
                 }
-                reader.readAsDataURL(url);
             });
-            return res;
-        } else {
-            // Send it to the server and return an url to it
-            let res = new Observable((obs) => {
-                let data = new FormData();
-                data.set('upload', url);
-                data.set('settings', 'featuredImg');
-
-                let xhr = new XMLHttpRequest();
-                xhr.open('POST', '/uploads/editor', true);
-                xhr.responseType = 'json';
-                xhr.onload = function() {
-                    if (xhr.readyState === xhr.DONE) {
-                        obs.next(xhr.response.url);
-                    }
-                }
-                xhr.onerror = function(err) {
-                    obs.error(err);
-                }
-                xhr.send(data);
-            });
-            return res;
-        }
-    }
-
-    /**
-     * Uploads a ressource to the server and returns the uploaded ressource.
-     * @param {string} file
-     * @param {string} url 
-     */
-    upload(data, url) {
-        let $ = this.jQuery;
-        return new Promise((resolve, reject) => {
-            if (typeof url === undefined || url === '') {
-                reject('URL is not set or is an empty string');
-            } else if (data === {}) {
-                reject('Data object is empty');
-            }
-            $.post(url, data, (response) => resolve(response));
+            xhr.open("POST", "http://localhost:3000/admin/media/upload");
+            xhr.setRequestHeader("cache-control", "no-cache");
+            xhr.send(data);
         })
-
+        return res;
     }
 
     /**
@@ -399,16 +408,15 @@ export default class ArticleEditor {
      */
     setPostData(data) {
         // Use an observable to throttle.
-        let _d = new Observable(obs => {
+        let _d = Observable.create(obs => {
             obs.next(data);
         }).pipe(
             throttleTime(1000),
         );
 
         // Subscribe to the observable and return a promise when data has bess saved.
-        _d.subscribe(val => {
-            console.log(val);
-            // this.saveEdit().data(val);
+        _d.subscribe(d => {
+            this.saver.editorData(d);
         });
         return new Promise((resolve, reject) => {
             resolve()
@@ -442,7 +450,8 @@ export default class ArticleEditor {
             tags: _cs.tags,
             shareOn: _cs.shareOn,
             excerpt: _cs.excerpt,
-            featuredImageUploader: _cs.featuredImgUploader
+            featuredImageUploader: _cs.featuredImgUploader,
+            featuredImg: _cs.featuredImg
         };
 
         // Create Observables for each setting the combine/merge them together.
@@ -452,17 +461,15 @@ export default class ArticleEditor {
                 map((e) => {
                     return { 'title': e.target.innerText }
                 }),
-                debounceTime(1000),
-                startWith({ 'title': undefined })
+                debounceTime(1000)
             )
         }
 
         function _stickFront() {
             return fromEvent(_s.front, 'change').pipe(
                 map((e) => {
-                    return { 'stickFront': e.target.checked }
-                }),
-                startWith({ 'stickFront': false })
+                    return { 'stickOnFront': e.target.checked }
+                })
             )
         }
 
@@ -470,15 +477,14 @@ export default class ArticleEditor {
             return fromEvent(_s.review, 'change').pipe(
                 map((e) => {
                     return { 'pendingReview': e.target.checked }
-                }),
-                startWith({ 'pendingReview': false })
+                })
             )
         }
 
         function _category() {
             return fromEvent(_s.categories, 'change').pipe(
                 map(e => {
-                    return { category: [e.target.name] }
+                    return { 'category': [e.target.name] }
                 }),
                 scan((acc, cur) => {
                     let key = cur.category[0];
@@ -491,29 +497,22 @@ export default class ArticleEditor {
                         return acc;
                     }
 
-                }),
-                startWith({ 'category': undefined })
+                })
             )
         }
 
         function _tags() {
-            return fromEvent(_s.tags, 'change').pipe(
-                map(() => {
-                    let _tags = [];
-                    let data = _M.Chips.getInstance(_s.tags).chipsData;
-                    data.forEach(d => {
-                        _tags.push(d.tag);
-                    });
-                    return { 'tags': _tags };
-                }),
-                startWith({ 'tags': undefined })
+            return fromEvent(_s.tags, 'value').pipe(
+                map((v) => {
+                    return { 'tags': v.d };
+                })
             )
         }
 
         function _shareOn() {
             return fromEvent(_s.shareOn, 'change').pipe(
                 map(e => {
-                    return { shareOn: [e.target.name] };
+                    return { 'shareOn': [e.target.name] };
                 }),
                 scan((acc, cur) => {
                     let key = cur.shareOn[0];
@@ -526,8 +525,7 @@ export default class ArticleEditor {
                         return acc;
                     }
 
-                }),
-                startWith({ shareOn: undefined })
+                })
             )
         }
 
@@ -536,15 +534,13 @@ export default class ArticleEditor {
                 map(e => {
                     return { 'excerpt': e.target.value };
                 }),
-                debounceTime(1000),
-                startWith({ 'excerpt': undefined })
+                debounceTime(1000)
             )
         }
 
         function _publishDate(picker) {
             return fromEvent(picker, 'submit').pipe(
                 map((e) => {
-
                     // Emit  value{mm,HH,DD,MM,YYYY} 
                     let minutes = e.format('mm');
                     let hour = e.format('HH');
@@ -559,9 +555,8 @@ export default class ArticleEditor {
                         month: month,
                         year: year
                     }
-                    return { 'publishDate': serverValue };
-                }),
-                startWith({ 'publishDate': 'immediately' })
+                    return { 'publicationDate': serverValue };
+                })
             )
         }
 
@@ -571,11 +566,16 @@ export default class ArticleEditor {
                     let _o;
                     let file = e.target.files[0];
                     _o = _this.readResource(file);
-                    return _o.pipe(map(val => { return { 'featuredImage': val } }));
-                }),
-                startWith({ 'featuredImage': undefined })
+                    return _o.pipe(map(val => {
+                        _s.featuredImg.trigger(_this.jQuery.Event('change:file', { file: val }))
+                        console.log(val);
+                        return { 'featuredImage': val }
+                    }));
+
+                })
             )
         }
+
 
         function _all(dp) {
             let subject = merge(
@@ -593,7 +593,6 @@ export default class ArticleEditor {
         }
         return {
             all: _all,
-            ftImg: _featuredImage
         }
     }
 
@@ -604,52 +603,87 @@ export default class ArticleEditor {
      */
     saveEdit() {
 
-        let isOffline = true | !window.navigator.onLine;
-        let $ = this.jQuery;
-        let url;
-        let timestamp;
+        let _this = this;
+        let $ = _this.jQuery;
+        let status = 'editing';
+        let isFirst = !_this._isPostUpdate;
+        let updateId = _this._updateId;
+        let url = `/admin/posts/new?status=${status}`;
+        let updateurl = `/admin/posts/update?status=${status}&id=${updateId}`;
         let settings = {};
+        let editorContent = '';
+        let errorTemplates = {
+            title: `<div class="mdi mdi-alert-outline">Cant\'t be saved without a <span>title</span></div>`,
+            category: `<div class="mdi mdi-alert-outline">Cant\'t be saved without a <span>category</span></div>`
+        }
+
+        function _setData(d, s) {
+            editorContent = d;
+            settings = s
+        }
+
+        function _getData() {
+            return settings
+        }
 
         function _saveSettings(datePicker) {
-
-            let _this = this;
-            let _c = this.cache;
-
-            let _o = _this.getPostSettings().all(datePicker);
+            let _o = _this.postSettings.all(datePicker);
             _o.subscribe(
                 (value) => {
-                    // console.log(Reflect.has(value, 'featuredImage'));
-                    // console.log(typeof value.featuredImage === 'string');
-                    // if (Reflect.has(value, 'featuredImage' && typeof value.featuredImage === 'string')) {
-                    // console.log('inseting');
-                    // _this.updateUI().featuredImg(_c.settings.featuredImg, value.featuredImage)
-                    // }
                     Object.assign(settings, value);
-                    console.log(settings);
+                    _this.cache.lastSave.trigger('resetTimer');
+                    _this._status = 'edited';
+                    _saveEditorData(editorContent)
                 }
             )
         }
 
-        function _saveEditorData(editorData) {
-            let _date = {
+        function _saveEditorData(editorData = editorContent) {
+            editorContent = editorData;
+            let _d = {
                 editorData: editorData,
-                postSettings: settings
+                postSettings: JSON.stringify(settings)
             };
-            if (isOffline) {
-                // The user is offline, use localStorage
-                if (window.localStorage) {
-                    localStorage.newPost = _date;
-                    return { newData: data, lastSave: timestamp }
-                }
+            let noTitle = !settings.title || settings.title === '';
+            let noCategory = !settings.category || settings.category === '' || settings.category.legth === 0;
+
+            // MUST BE SET BEFORE ANY SAVE: Title and category
+            if (noTitle) {
+                _this.M.toast({ html: errorTemplates.title });
+            }
+            if (noCategory) {
+                _this.M.toast({ html: errorTemplates.category });
+
+            }
+            if (noTitle || noCategory) {
+                return
             } else {
                 // Send an Ajax post
-                $.post(url, data);
+                let _s;
+                (isFirst) ? _s = $.post(url, _d): _s = $.post(updateurl, _d);
+
+                _s.then(r => {
+                    console.log(r);
+                    if ((r.saved && r.saved === true) || (r.updated && r.updated === true)) {
+                        _this.cache.lastSave.trigger('updateTimer');
+                        _this._status = 'saved';
+                        isFirst = false;
+                        updateId = r.id;
+                    }
+                }).catch(err => {
+                    if (err.message) {
+                        let errorTemplate = `<div>Post was not saved</div><div>${err.message}</div>`
+                        _this.M.toast({ html: errorTemplate });
+                    }
+                });
             }
         }
 
         return {
+            DATA: _getData,
+            setData: _setData,
             settings: _saveSettings,
-            editorData: _saveEditorData,
+            editorData: _saveEditorData
         }
     }
 
@@ -657,33 +691,23 @@ export default class ArticleEditor {
      * Update edit status, word count, publish date and last save timer.
      */
     updateUI() {
-
-        function _status(elt, state) {
-            state.subscribe(value => {
-                elt.html(value)
-            })
-        }
-
-        function _count(elt, counter) {
+        function _count(e, counter) {
             counter.subscribe(value => {
-                elt.html(`${value} words.`);
-            });
-        }
-
-        function _timer(elt, timestamp, clock) {
-            clock.subscribe(value => {
-                let _lastSave = (Date.now() - (timestamp + value));
-                elt.html(`Saved ${_lastSave}s ago.`);
+                e.html(`${value} words.`);
             });
         }
 
         function _date(container, scheduleCont, value) {
+            let dayOfWeek, dayCardinal, monthLong, hour, minutes = '';
 
-            let dayOfWeek = value.format('ddd');
-            let dayCardinal = value.format('Do');
-            let monthLong = value.format('MMM');
-            let minutes = value.format('mm');
-            let hour = value.format('HH');
+            if (!value._isAMomentObject) {
+                value = Moment(value)
+            }
+            dayOfWeek = value.format('ddd');
+            dayCardinal = value.format('Do');
+            monthLong = value.format('MMM');
+            minutes = value.format('mm');
+            hour = value.format('HH');
 
             let date = `${dayOfWeek} ${dayCardinal} ${monthLong} @ ${hour}:${minutes}`;
             const ICON_ELT = container.children();
@@ -692,19 +716,16 @@ export default class ArticleEditor {
             scheduleCont.text(date).parent().removeClass('d-none');
         }
 
-        function _featuredImg(imgCont, path) {
-            console.log(imgCont, path);
-            imgCont.src = path;
+        function _featuredImg(imgCont, btn, path) {
+            imgCont.attr('src', path).removeClass('no-image').addClass('z-depth-3');
+            btn.addClass('animated slideindown').removeClass('no-image').text('change image');
         }
         return {
-            status: _status,
             count: _count,
-            timer: _timer,
             date: _date,
             featuredImg: _featuredImg
         };
     }
-
 
     /**
      * Bind the cached ui elements to functions using them.
@@ -731,15 +752,83 @@ export default class ArticleEditor {
         c.HTMLTrigger.on('click', getHandler('setHTML').bind(_this, c.HTMLContainer));
         cs.datePicker.on('click', getHandler('showPicker').bind(_this, cs.datePicker, cs.datePickerContainer, cs.dateContainer, picker));
         cs.deleteBtn.on('click', getHandler('delete').bind(_this));
-        c.previewBtn.on('preview', getHandler('preview').bind(_this));
+        c.previewBtn.on('click', getHandler('preview').bind(_this));
         c.publishBtn.on('click', getHandler('publish').bind(_this));
-        cs.dateContainer.on('dateChange'), getHandler('dateChange').bind(null, cs.datePicker, cs.dateContainer);
         cs.featuredImgUploaderBtn.on('click', () => { cs.featuredImgUploader.click() });
-        _this.getPostSettings().ftImg().subscribe(img => {
-            if (typeof img.featuredImage === 'string') {
-                cs.featuredImg.attr('src', img.featuredImage);
+        cs.featuredImg.on('change:file', (e) => {
+            if (typeof e.file === 'string') {
+                _this.updateUI().featuredImg(cs.featuredImg, cs.featuredImgUploaderBtn, e.file)
             }
+        });
+        c.lastSave.on('updateTimer', () => { c.lastSave.text('saved').removeClass('edited') });
+        c.lastSave.on('resetTimer', () => { c.lastSave.text('edited').addClass('edited') });
+        _this.saver.settings.call(_this, picker);
+    }
+
+    _UpdatePost() {
+        let _this = this;
+        let $ = _this.jQuery;
+        let id = _this._updateId;
+        // Get the current data from the server
+        let d = $.ajax('http://localhost:3000/admin/posts/update/oldversion', {
+            method: 'GET',
+            dataType: 'json',
+            data: { id: id },
+        });
+        d.then(p => {
+            // Separate editor content and post settings
+            let d = p.content;
+            Reflect.deleteProperty(p, 'content');
+            // Change the publicationDate to an object {day: "29",hour: "21",minute: "50",month: "09",year: "2018"}
+            let pd = Moment(p.publicationDate);
+            let _pd = { minute: pd.format('mm'), hour: pd.format('HH'), day: pd.format('DD'), month: pd.format('MM'), year: pd.format('YYYY') }
+                // Update time
+            _this.updateUI().date(_this.cache.settings.datePicker, _this.cache.settings.dateContainer, pd);
+            p.publicationDate = _pd;
+            // Update the saver and the editor
+            _this.saver.setData(d, p)
+            if (d !== '') {
+                _this.editor.setData(d)
+            }
+            // Update tags
+            let t = p.tags;
+            if (Array.isArray(t) && t.length > 0) {
+                let itag = _this.M.Chips.getInstance(_this.cache.settings.tags[0]);
+                t.forEach(_t => {
+                    itag.addChip({ tag: _t })
+                });
+            }
+            // Resize the textarea
+            // _this.M.textareaAutoResize(_this.cache.settings.excerpt)
+            // Initialize check boxes
+            // Categories
+            let c = p.category
+            if (Array.isArray(c) && c.length > 0) {
+                let csc = _this.cache.settings.category;
+                let _csc = [csc[0], csc[1], csc[2]];
+                c.forEach(_c => {
+                    _csc.forEach(e => {
+                        if (e.name === _c) {
+                            e.dispatchEvent(new Event('change'))
+                        }
+                    });
+                });
+            }
+            // ShareOn
+            let s = p.shareOn
+            if (Array.isArray(s) && s.length > 0) {
+                let csc = _this.cache.settings.shareOn;
+                let _csc = [csc[0], csc[1], csc[2]];
+                s.forEach(_c => {
+                    _csc.forEach(e => {
+                        if (e.name === _c) {
+                            e.dispatchEvent(new Event('change'))
+                        }
+                    });
+                });
+            }
+        }).catch(err => {
+            _this.M.toast({ html: err.message })
         })
-        _this.saveEdit().settings.call(_this, picker);
     }
 }

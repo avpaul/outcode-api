@@ -1,18 +1,24 @@
 nav.blog
-    a.brand-logo.waves-effect(href="/admin") 
+    a.brand-logo.waves-effect(href="/") 
         img(src="/images/blog-logo.svg", alt="avpaul", srcset="")
-    
-    a.mdi.mdi-menu.sidenav-trigger.mdi-36px.white-text(data-target="mobile-nav")
+    //- for future release 
+    //- button.socialFeed-trigger social
+    //-     i.hide-on-med-and-up.mdi.mdi-chevron-down
+    a.menubar.hide-on-med-and-up(data-target="mobile-nav")
+            span.menubar_t
+            span.menubar_m
+            span.menubar_b
+
     ul.hide-on-med-and-down.text-uppercase
         li
-            a.white-text(href="") home
+            a.white-text(href="/") home
         li
-            a.white-text(href="") articles
+            a.white-text(href="/articles") articles
         li
-            a.white-text(href="") projects
+            a.white-text(href="/projects") projects
         li
-            a.white-text(href="") ressources
+            a.white-text(href="/ressources") ressources
         li
-            a.white-text(href="") about
+            a.white-text(href="/about") about
         li
             a.white-text.mdi.mdi-search-web(href="")

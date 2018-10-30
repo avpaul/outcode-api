@@ -25,11 +25,6 @@ module.exports = {
             minChunks: 1,
             name: true,
             cacheGroups: {
-                icons: {
-                    test: /[\\/]src[\\/]vendorjs[\\/]fontawesome-all/,
-                    name: 'icons',
-                    chunks: 'all'
-                },
                 editor: {
                     test: /[\\/]src[\\/]vendorjs[\\/]ckeditor/,
                     name: 'editor',
@@ -70,6 +65,7 @@ module.exports = {
         new webpack.ProvidePlugin({
             $: path.join(__dirname, '/src', '/vendorjs', 'jquery-3.3.1.min'),
             jQuery: path.join(__dirname, '/src', '/vendorjs', 'jquery-3.3.1.min'),
+            jquery: path.join(__dirname, '/src', '/vendorjs', 'jquery-3.3.1.min'),
             'window.jQuery': path.join(__dirname, '/src', '/vendorjs', 'jquery-3.3.1.min')
         }),
         new webpack.optimize.ModuleConcatenationPlugin(),

@@ -1,39 +1,30 @@
 var express = require('express');
 var router = express.Router();
-var blogCtrl = require('../controller/blog');
-var admnCtrl = require('../controller/admin');
-var editorCtrl = require('../controller/editor');
+var gen = require('../controller/general');
+var blog = require('../controller/blog');
+var comment = require('../controller/comments');
 
+// HOME
+router.get('/', gen.home);
 
-var ejwt = require('express-jwt');
-var auth = ejwt({
-    secret: 'iamtheoneandonly',
-    userProperty: 'payload'
-});
+// BLOG/ARTICLES
+router.get('/blog', blog.getAll)
+router.get('/blog/:title', blog.getOne)
+router.get('/blog?category', blog.getCategory);
+router.get('/blog?tag', blog.getTag);
 
-router.get('/', blogCtrl.homeCtrl);
-router.get('/home', blogCtrl.homeCtrl);
-router.get('/article', blogCtrl.articleCtrl)
-router.get('/demos', blogCtrl.demoCtrl);
-router.get('/ressources', blogCtrl.resCtrl);
-// router.get('/about', blogCtrl.aboutCtrl);
-router.get('/about', blogCtrl.about);
+// COMMENTS
+router.get('/comments', comment.get);
+router.post('/comments/new', comment.new);
+router.post('/comments/update', comment.update);
+router.post('/comments/reply', comment.reply);
+router.delete('/comments/delete', comment.delete);
 
-// ADMIN
-router.get('/admin', admnCtrl.loginCtrl);
-router.get('/admin/signup', admnCtrl.signupCtrl);
-router.get('/admin/posts', admnCtrl.postsCtrl);
-router.get('/admin/posts/new', admnCtrl.newPostCtrl);
-router.get('/admin/media', admnCtrl.mediaCtrl);
-router.get('/admin/metrics', admnCtrl.metricsCtrl);
-router.get('/admin/comments', admnCtrl.commentsCtrl);
-
-// handle post methods here
-router.post('/admin', admnCtrl.login);
-router.post('/admin/signup', admnCtrl.signup);
-
-// Editor
-// router.post('/uploads/editor', upload.single('upload'), editorCtrl.uploads);
-router.post('/uploads/editor', editorCtrl.uploads);
+// OTHERS
+router.get('/projects', gen.projects);
+router.get('/ressources', gen.ressource);
+router.get('/about', gen.about);
+router.get('/about#work', gen.about);
+router.get('/about#contact', gen.about);
 
 module.exports = router;

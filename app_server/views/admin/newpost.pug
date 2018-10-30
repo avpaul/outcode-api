@@ -5,18 +5,18 @@ block content
             button.btn-flat.btn-outline.text-lowercase.waves-effect.waves-light.edit-close close
             a.brand-logo.waves-effect(href="/admin/metrics") 
                 img(src="/images/blog-logo.svg", alt="avpaul", srcset="")
-            div.edit-status-save.d-inline-block edited
+            .editor-status-save.d-inline-block  
             .d-inline-block.flex-grow-1
             .d-flex.align-items-center
                 button.btn-icon.white-text.sidenav-trigger(data-target="post-settings")
                     i.mdi.mdi-cogs.mdi-36px
-                button.btn-flat.btn-outline.waves-effect.waves-light#edit-preview preview
-                button.btn-flat.btn-outline.waves-effect.waves-light#edit-publish publish
+                button.btn-flat.btn-outline.waves-effect.waves-light.edit-preview preview
+                button.btn-flat.btn-outline.waves-effect.waves-light.edit-publish publish
         
         .sidenav.no-autoinit(id="post-settings")
-            div.sidenav-title Post Settings
+            .sidenav-title Post Settings
 
-            ul.collapsible
+            ul.collapsible.no-autoinit
                 li
                     .collapsible-header.text-capitalize status
                         i.mdi.mdi-chevron-down.text-primary
@@ -86,7 +86,7 @@ block content
                     .collapsible-header.text-capitalize excerpt
                         i.mdi.mdi-chevron-down.text-primary
                     .collapsible-body
-                        .input-field
+                        .input-field.clearfix
                             textarea.materialize-textarea.post-excerpt(name="post-excerpt", rows="30", data-length="200")
                             label(for="post-excerpt") Post excerpt
             .d-flex.justify-content-center.align-items-end
@@ -109,9 +109,12 @@ block content
                 pre
                     code.html.editor-html-view
 
-            .editor-status.d-flex.justify-content-between.fixed-bottom
-                .editor-status-save Saved 20s ago
-                .editor-status-wordcount 0 words
+            .editor-status-wordcount.fixed-bottom 0 words
+        
+            //- Include cookie conset 
+            include ../_cookiesConset
+            //- Include delete post modal
+            include _genericModal
 block scripts 
     script(src="/build/vendors~main.chunk.js")
   

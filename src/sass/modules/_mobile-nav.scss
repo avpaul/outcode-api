@@ -26,12 +26,13 @@ nav.blog~.sidenav-overlay {
         justify-content: space-between;
         padding-left: 20px;
         padding-right: 20px;
+        margin-bottom: 10px;
         .btn-floating {
             width: 56px;
             height: 56px;
             i {
                 font-size: 32px;
-                line-height: 50px;
+                line-height: 56px;
             }
         }
         #follow-facebook {
@@ -48,10 +49,16 @@ nav.blog~.sidenav-overlay {
         }
     }
     ul.nav {
+        width: 70%;
+        margin-left: 1.4rem;
+        .active {
+            border-bottom: 2px $secondary-color solid;
+        }
         a {
             color: $white;
             font-size: 24px;
             font-weight: 300;
+            padding-left: 1.2rem
         }
     }
 }

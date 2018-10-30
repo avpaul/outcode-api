@@ -1,4 +1,23 @@
 extends layout
 block content
-    .metrics
+    .posts
+        //- Include the navigation and the sidenav
         include _nav
+        include _sidenav    
+        
+        .container-fluid
+            h3.ml-3 In edit
+            .d-flex.flex-wrap
+                
+                each post in posts
+                    .card.sticky-action
+                        .card-image.waves-effect.waves-block.z-depth-2
+                            img.activator.responsive-img(src=post.featuredImage,alt="")
+                        h5.card-title= post.title
+                        .card-action.clearfix
+                            btn.btn.mdi.mdi-delete-forever.float-left.waves-effect.waves-ripple  delete
+                            a.btn.mdi.mdi-playlist-edit.float-right.waves-effect.waves-ripple(href="/admin/posts/update?id="+post.id)  edit
+                        .card-reveal
+                            .card-title.materialize-red-text= post.title
+                                i.mdi.mdi-close.card-reveal-close
+                            p= post.excerpt

@@ -2,7 +2,7 @@ doctype html
 html(lang="en")
 
     head
-     meta(charset="UTF-8")
+        meta(charset="UTF-8")
         meta(name="viewport" content="width=device-width, initial-scale=1.0")
         meta(name="theme-color" content="#222")
         meta(http-equiv="X-UA-Compatible" content="ie=edge")
@@ -11,42 +11,40 @@ html(lang="en")
         link(rel="stylesheet" href="/build/main.css")
         title= title
     body
-        nav.navbar.navbar-expand-md.justify-content-center
-            div.navbar-header 
-                a.navbar-brand(href="#") av_Paul
-        div.container.mt-5.text-center
-            div.row.justify-content-center.align-items-center.pt-md-5
-                form.col-sm-9.col-md-6.py-3.px-sm-3.mx-3.mx-sm-0(action="" method="post")
-                    h1 Request account to start editing!
-                    div.input-group.mt-3
-                        div.input-group-prepend
-                            div.input-group-text
-                                i.fas.fa-envelope.fa-fw(style="color: #071d34")
-                        input.form-control#email(type="email" name="email" placeholder="you@avpaul.me" required)
-                    div.input-group.mt-3
-                        div.input-group-prepend
-                            div.input-group-text
-                                i.fas.fa-lock.fa-fw(style="color: #071d34")
-                        input.form-control#pword(type="password" name="password" required) 
-                    if(message)
-                    div=message
-                    div.mt-3.text-right
-                        button.btn.btn-dark.btn-lg#request(type="submit") Request
-                    div.text-right.mt-3
-                        a.btn-link(href="#") Forgot your Password?
-                    div.text-right.mt-0
-                        a.btn-link(href="./") or you have an account?
-            
-        footer.fixed-bottom
-            div.text-center.f-copyright
-                i.fas.fa-copyright 
-                |&nbsp;2018 av paul
-            div.text-center.pb-1 Designed with 
-                i.fas.fa-heart(style="color: red")
-                |&nbsp; in Gisenyi
+        .login
+            nav
+                a.waves-effect.waves-classic.brand-logo(href="/") 
+                    img(src="/images/blog-logo.svg", alt="", srcset="")
+        
+            .form-container
+                    form()
+                        h5 Create an account to start editing! 
+                        .row
+                            .input-field.col-12
+                                input#user-email(type="email" )
+                                label(for="user-email") you@avpaul.me
+                                span.helper-text(data-wrong="wrong!" data-success="correct!")
+                            .input-field.col-12
+                                input#user-password(type="password")
+                                label(for="user-password") your strong password
+                                span.helper-text(data-wrong="wrong!" data-success="correct!")
+                            .col-12
+                                btn.btn#signUp Sign me up
+                            .col-12.pt-2
+                                p
+                                    a(href="/admin") Do you have an account!
+                                p
+                                    a(href="#") Forgot your Password or Email?
+            footer
+                .white-text Designed with much 
+                    i.mdi.mdi-heart.materialize-red-text
+                    |&nbsp; in Gisenyi &nbsp;
+                    img(src="/images/rda.jpeg", alt="")
+
+        include ../_cookiesConset
+        
         script(type="text/javascript" src="/build/vendors~main.chunk.js")
         script(type="text/javascript" src="/build/editor.chunk.js")
-        script(type="text/javascript" src="/build/icons.chunk.js")
         script(type="text/javascript" src="/build/jquery.chunk.js")
         script(type="text/javascript" src="/build/materialize.chunk.js")
         script(type="text/javascript" src="/build/popper.chunk.js")
