@@ -1,7 +1,7 @@
 // 'use strict';
 
 //NODE ENV
-process.env.mode = 'dev';
+process.env.mode = 'prod';
 
 //EXPRESS IMPORTS
 var createError = require('http-errors');
