@@ -81,6 +81,7 @@ block content
                         btn.btn.float-right.add-comment.waves-effect.waves-ripple.mb-2 add comment
                 .comments
                     if post.comments
+                        post.comments = post.comments.filter()
                         each comment in post.comments
                             .card.comment
                                 .card-title

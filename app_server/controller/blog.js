@@ -18,10 +18,10 @@ module.exports.getOne = function(req, res, next) {
         })
     });
 
-}
+};
 module.exports.getCategory = function(req, res, next) {
 
-}
+};
 module.exports.getTag = function(req, res, next) {
 
-}
+};
