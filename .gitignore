@@ -13,3 +13,4 @@ node_modules/
 .idea/**/mongoSettings.xml
 
 package-lock.json
+/.dbdump/
