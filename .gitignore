@@ -1,4 +1,16 @@
+# node packages directory
 node_modules/
+
+# vscode editor versioned files and confif files
 .vscode/
+
+# IDEA editor verioned files and config files
+.idea/**/*.xml
+.idea/**/dictionaries
+.idea/**/shelf
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/mongoSettings.xml
+
 package-lock.json
 /.dbdump/
