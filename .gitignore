@@ -5,7 +5,7 @@ node_modules/
 .vscode/
 
 # IDEA editor verioned files and config files
-.idea/**/*.mxl
+.idea/**/*.xml
 .idea/**/dictionaries
 .idea/**/shelf
 .idea/**/dataSources/
@@ -13,3 +13,4 @@ node_modules/
 .idea/**/mongoSettings.xml
 
 package-lock.json
+/.dbdump/

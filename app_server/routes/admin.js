@@ -6,7 +6,7 @@ var post = require('../controller/posts');
 var user = require('../controller/user');
 var media = require('../controller/media');
 
-// JSON WEB TOKEN/ ATHORIZATION 
+// JSON WEB TOKEN/ AUTHORIZATION
 // Modify ejwt getToken function to use cookies also
 var ejwt = require('express-jwt');
 var auth = ejwt({

@@ -8,8 +8,8 @@ var comment = require('../controller/comments');
 router.get('/', gen.home);
 
 // BLOG/ARTICLES
-router.get('/blog', blog.getAll)
-router.get('/blog/:title', blog.getOne)
+router.get('/blog', blog.getAll);
+router.get('/blog/:title', blog.getOne);
 router.get('/blog?category', blog.getCategory);
 router.get('/blog?tag', blog.getTag);
 

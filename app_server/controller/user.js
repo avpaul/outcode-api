@@ -19,7 +19,7 @@ module.exports.create = function(req, res, next) {
         }
     }
 
-    var done = function(token, id) {
+    var done = function(token, id) {-
         res.status(200);
         res.json({ token: token, id: id })
     }

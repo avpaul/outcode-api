@@ -28,26 +28,26 @@ block content
                 btn.btn-floating#share-linkedin
                     i.mdi.mdi-linkedin
 
-            .article-content           
+            .article-content
                 h1= post.title
                 .article-info
-                    div By 
+                    div By
                         span.article-author.text-capitalize= post.author
-                        |&nbsp; in 
+                        |&nbsp; in
                         a.text-capitalize.article-category(href="/blog?category="+post.category)=  `${post.category}`
                     if post.updatedOn
-                        div Originally published 
+                        div Originally published
                             span.article-publicationDate #{new Date(post.publicationDate).toLocaleDateString('en-US',dFormater)},
-                            |updated 
+                            |updated
                             span.article-publicationDate #{new Date(post.updatedOn).toLocaleDateString('en-US',dFormater)}
                     else
-                        div Originally published 
+                        div Originally published
                             span.article-publicationDate #{new Date(post.publicationDate).toLocaleDateString('en-US',dFormater)}
 
                 <html>
                 | !{post.content}
                 </html>
-               
+
 
                 h2.text-demi What to read next:
                 .suggested-articles
@@ -55,7 +55,7 @@ block content
                         img(src= next[0].featuredImage, alt="")
                         .py-2.px-3
                             a.h4(href= next[0].title.toLowerCase().replace(/(\s)/g, (w) => '-')+'?id='+next[0].id)= next[0].title
-                            p= next[0].excerpt  
+                            p= next[0].excerpt
                             .d-flex.justify-content-between.suggested-article-actions
                                 .mdi.mdi-clock #{new Date(post.publicationDate).toLocaleDateString('en-US',dFormater)}
                                 a.mdi.mdi-arrow-right(href= next[0].title.toLowerCase().replace(/(\s)/g, (w) => '-')+'?id='+next[0].id)
@@ -63,11 +63,11 @@ block content
                         img(src= next[1].featuredImage, alt="")
                         .py-2.px-3
                             a.h4(href= next[1].title.toLowerCase().replace(/(\s)/g, (w) => '-')+'?id='+next[1].id)= next[1].title
-                            p= next[1].excerpt 
+                            p= next[1].excerpt
                             .d-flex.justify-content-between.suggested-article-actions
                                 .mdi.mdi-clock #{new Date(post.publicationDate).toLocaleDateString('en-US',dFormater)}
                                 a.mdi.mdi-arrow-right(href= next[0].title.toLowerCase().replace(/(\s)/g, (w) => '-')+'?id='+next[0].id)
-                        
+
         .article-comments
             .container.pt-1
                 h4 Responses
@@ -75,13 +75,13 @@ block content
                     .input-field
                         input.comment-author_input(type="text", name="",placeholder="Your name")
                     textarea.comment-textarea.materialize-textarea(name="new-comment", cols="80",placeholder="Your thoughts...")
-                    if post.comments.length !== 0 
+                    if post.comments.length !== 0
                         btn.btn.float-right.add-comment.waves-effect.waves-ripple add comment
                     else
                         btn.btn.float-right.add-comment.waves-effect.waves-ripple.mb-2 add comment
                 .comments
                     if post.comments
-                        each comment in post.comments 
+                        each comment in post.comments
                             .card.comment
                                 .card-title
                                     span.comment-author= comment.author
@@ -90,13 +90,13 @@ block content
                                 .card-action
                                     button.btn-icon.comment-replies 2 replies
                                         i.mdi.mdi-chevron-down
-    
+
 
     //- include the footer
     include _footer
     //- include cookies conset
     include ../_cookiesConset
-    
-                        
 
-       
+
+
+
