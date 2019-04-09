@@ -4,7 +4,7 @@ node_modules/
 # vscode editor versioned files and confif files
 .vscode/
 
-# IDEA editor verioned files and config files
+# IDEA editor verioned files and configs files
 .idea/**/*.xml
 .idea/**/dictionaries
 .idea/**/shelf
