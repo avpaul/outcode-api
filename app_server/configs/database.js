@@ -13,7 +13,6 @@ mongoose.connection.on('connected', () => console.log('Mongoose connected'));
 mongoose.connection.on('error', err => console.log(`Mongoose connection error: ${err}`));
 mongoose.connection.on('disconnected', () => console.log('Mongoose disconnected'));
 
-
 // reusable db connection close function
 const gracefulShutdown = (message, callback) => {
   mongoose.connection.close(() => {

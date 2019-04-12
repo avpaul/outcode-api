@@ -24,7 +24,7 @@ $(document).ready(function() {
         let url = 'http://localhost:3000/comments/new';
         let id = CookieReader.getItem('bpid');
 
-        let o = $.post({
+        let o = $.posts({
             url: url,
             data: {
                 id: id,

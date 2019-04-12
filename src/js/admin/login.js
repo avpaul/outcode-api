@@ -22,7 +22,7 @@ class UserLogger {
         _events = [{
                 key: '_login',
                 value: function _login(e, p) {
-                    // Receives user data: userEmail and userPassword 
+                    // Receives user data: userEmail and userPassword
 
                     if (!e || e === '' || !p || p === '') return;
                     let _e = e;
@@ -69,7 +69,7 @@ class UserLogger {
                     let nextUrl = 'http://localhost:3000/admin/login';
                     let ajxRes;
 
-                    ajxRes = $.ajax.post(
+                    ajxRes = $.ajax.posts(
                         url, {
                             email: _e,
                             password: _p

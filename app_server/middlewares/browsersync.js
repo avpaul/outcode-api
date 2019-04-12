@@ -2,6 +2,8 @@ import BrowserSync from 'browser-sync';
 import ConnectBrowser from 'connect-browser-sync';
 
 const browserSync = BrowserSync.create().init({
+  port: 3001,
+  proxy: 'localhost:3000',
   logSnippet: false,
   online: false,
   files: ['../../app_server/routes', '../../app_server/controllers', '../../app_api'],
@@ -12,7 +14,7 @@ const browserSync = BrowserSync.create().init({
     forms: true,
     scroll: true,
   },
-  browser: 'google chrome',
+  // browser: 'google chrome',
   plugins: [{
     module: 'bs-html-injector',
     options: {

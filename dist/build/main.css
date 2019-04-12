@@ -2642,7 +2642,7 @@ blockquote,
     color: #424242; }
     blockquote .blockquote-footer::before,
     .blockquote .blockquote-footer::before {
-      content: "\2014   \A0"; }
+      content: "\2014 \00A0"; }
 
 i {
   line-height: inherit; }
@@ -2907,7 +2907,7 @@ table {
     position: relative;
     /* sort out borders */ }
     table.responsive-table td:empty:before {
-      content: '\A0'; }
+      content: '\00a0'; }
     table.responsive-table th,
     table.responsive-table td {
       margin: 0;
@@ -2921,7 +2921,7 @@ table {
         display: block;
         padding: 0 10px 0 0; }
         table.responsive-table thead tr th::before {
-          content: "\A0"; }
+          content: "\00a0"; }
     table.responsive-table tbody {
       display: block;
       width: auto;

@@ -7,14 +7,15 @@ import ENV from 'dotenv';
 import BrowserSyncMiddleware from './app_server/middlewares/browsersync';
 import ErrorHandlers from './app_server/middlewares/errorhandlers';
 import WebpackMiddleware from './app_server/middlewares/webpack';
-import indexRoutes from './app_server/routes/index';
-import adminRoutes from './app_server/routes/admin';
 import './app_server/configs/database';
 import './app_server/configs/passport';
+import appRoutes from './app_server/routes/index';
+
 
 ENV.config();
 
 const app = express();
+const port = process.env.PORT || 3000;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'app_server', 'views'));
@@ -27,7 +28,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'dist')));
 
 // add all development middleware's
-if (process.env.mode === 'prod') {
+if (!(process.env.MODE === 'prod')) {
   // add browser-sync middleware
   app.use(BrowserSyncMiddleware);
 
@@ -40,10 +41,11 @@ if (process.env.mode === 'prod') {
 app.use(passport.initialize({}));
 
 // add app routing
-app.use('/', indexRoutes);
-app.use('/admin', adminRoutes);
+app.use(appRoutes);
 
-app.use(ErrorHandlers.catch404());
-app.use(ErrorHandlers.errorHandler());
+app.use(ErrorHandlers.catch404);
+app.use(ErrorHandlers.errorHandler);
+
+app.listen(port);
 
 export default app;

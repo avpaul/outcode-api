@@ -1,7 +1,7 @@
-module.exports = function(env) {
-    if (env === 'dev' || 'prod') {
-        return require('./webpack.' + `${env}`);
-    } else {
-        console.error(`Mode: ${env} \n Allowed modes are prod or dev.`)
-    }
-}
+export default (env) => {
+  if (env === 'dev' || env === 'prod') {
+    return require(`./webpack.${env}`);
+  }
+  console.error(`Mode: ${env} \n Allowed modes are prod or dev.`);
+  return null;
+};

@@ -55,18 +55,18 @@ function _setCookies(c) {
         let ins = M.Modal.init(c.cookieModal, { opacity: 0, dismissible: false, endingTop: eTop });
         ins[0].open();
         CookieReader.setItem('cookiesAccepted', 'true', new Date(Date.now() + 31622400).toUTCString(), '/');
-        CookieReader.setItem('user', JSON.stringify({ name: 'avpaul', token: '', type: 'admin' }), '31536e3', '/');
+        CookieReader.setItem('users.js', JSON.stringify({ name: 'avpaul', token: '', type: 'admin' }), '31536e3', '/');
         c.cookieAgree.on('click', () => {
             ins[0].close();
         });
         c.cookieDisagree.on('click', () => {
-            CookieReader.setItem('user', '');
+            CookieReader.setItem('users.js', '');
             CookieReader.setItem('cookiesAccepted', 'false', '/')
             ins[0].close();
             return;
         });
-    } else if (CookieReader.getItem('cookiesAccepted') === true && !CookieReader.hasItem('user')) {
-        CookieReader.setItem('user', JSON.stringify({ name: 'avpaul', token: '', type: 'admin' }), '31536e3', '/');
+    } else if (CookieReader.getItem('cookiesAccepted') === true && !CookieReader.hasItem('users.js')) {
+        CookieReader.setItem('users.js', JSON.stringify({ name: 'avpaul', token: '', type: 'admin' }), '31536e3', '/');
     } else if (CookieReader.getItem('cookiesAccepted') === false) {
         return
     }

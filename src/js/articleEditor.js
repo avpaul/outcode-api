@@ -5,12 +5,12 @@ import CookieReader from './cookieReader';
 
 export default class ArticleEditor {
     /**
-     * 
-     * @param {Object} cache 
-     * @param {Object} Materialize 
-     * @param {Object} ckEditor 
-     * @param {Object} dateTimePicker 
-     * @param {string} fromURL 
+     *
+     * @param {Object} cache
+     * @param {Object} Materialize
+     * @param {Object} ckEditor
+     * @param {Object} dateTimePicker
+     * @param {string} fromURL
      */
     constructor(cache, Materialize, ckEditor, dateTimePicker, isUpdate, updateId, fromURL = 'posts') {
         // first, cache the ui elemets to be used later
@@ -175,7 +175,7 @@ export default class ArticleEditor {
         // Initialize date picker and pas its instance to bindui
         _this._picker = _this.initPicker(cs.datePickerContainer, cs.dateContainer, _this.picker, _this.jQuery);
 
-        //Call bindUI 
+        //Call bindUI
         // Create an event objects
         let events = [{
             key: 'close',
@@ -253,7 +253,7 @@ export default class ArticleEditor {
     /**
      * Deletes the editor content.
      * For a published post fire a toast/dialog modal "Posts can be deleted in posts section."
-     * For a new edit or a pending review a fire-up a modal dialogue for Yes/No then clear the editor 
+     * For a new edit or a pending review a fire-up a modal dialogue for Yes/No then clear the editor
      * and delete the uploaded or saved(in cache) ressources i.e: images.
      */
     deleteDraft() {
@@ -297,17 +297,17 @@ export default class ArticleEditor {
         }
         let id = CookieReader.getItem('editingPostID');
         let title = (_this.saver.DATA().title.toLowerCase()).replace(/(\s)/g, (w) => '-');
-        // Post URL format avpaul.me/article/here-goes-the-title?id=201811052301 
+        // Post URL format avpaul.me/article/here-goes-the-title?id=201811052301
         let postUrl = new URL(`${title}?id=${id}`, 'http://localhost:3000/admin/posts/preview/');
         window.open(postUrl.href);
     }
 
-    /** 
+    /**
      * Publish a new post.
-     * Fire-up a modal for publish comfirmation. Check all post settings 
+     * Fire-up a modal for publish comfirmation. Check all post settings
      * and if conditions for publish are met then post it.
      * conditions:
-     *  1.Publish date must be set to immediately 
+     *  1.Publish date must be set to immediately
      *    i.e: when other than immediately its can cause other issues as it is an automated process.
      *  2.Title
      *  3.>= 500  words
@@ -336,7 +336,7 @@ export default class ArticleEditor {
                 jq.then(r => {
                     if (r.published === true) {
                         let title = (_this.saver.DATA().title.toLowerCase()).replace(/(\s)/g, (w) => '-');
-                        // Post URL format avpaul.me/article/here-goes-the-title?id=201811052301 
+                        // Post URL format avpaul.me/article/here-goes-the-title?id=201811052301
                         let postUrl = new URL(`${title}?id=${r.id}`, 'http://localhost:3000/blog/');
                         console.log(postUrl);
                         window.open(postUrl.href);
@@ -398,13 +398,13 @@ export default class ArticleEditor {
     }
 
     /**
-     * Returns an Observable value which evaluates to the editor wordcount. 
+     * Returns an Observable value which evaluates to the editor wordcount.
      */
     getWordCount() {}
 
     /**
      * Passed to ckeditor auto-save plugin.
-     * @param {string} data 
+     * @param {string} data
      */
     setPostData(data) {
         // Use an observable to throttle.
@@ -432,9 +432,9 @@ export default class ArticleEditor {
      *    category
      *    tags
      *    share
-     *    excerpt 
+     *    excerpt
      *    publishDate
-     *    featuredImage 
+     *    featuredImage
      * }
      */
     getPostSettings() {
@@ -541,7 +541,7 @@ export default class ArticleEditor {
         function _publishDate(picker) {
             return fromEvent(picker, 'submit').pipe(
                 map((e) => {
-                    // Emit  value{mm,HH,DD,MM,YYYY} 
+                    // Emit  value{mm,HH,DD,MM,YYYY}
                     let minutes = e.format('mm');
                     let hour = e.format('HH');
                     let day = e.format('DD');
@@ -599,7 +599,7 @@ export default class ArticleEditor {
     /**
      * Save the post edit on the server or in localstorage when offline.
      * Saved content are: post title,editor content and post settings.
-     * First time all are saved, for next time only changed contents are saved. 
+     * First time all are saved, for next time only changed contents are saved.
      */
     saveEdit() {
 
@@ -660,7 +660,7 @@ export default class ArticleEditor {
             } else {
                 // Send an Ajax post
                 let _s;
-                (isFirst) ? _s = $.post(url, _d): _s = $.post(updateurl, _d);
+                (isFirst) ? _s = $.posts(url, _d): _s = $.posts(updateurl, _d);
 
                 _s.then(r => {
                     console.log(r);

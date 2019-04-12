@@ -24,22 +24,6 @@ const PostSchema = new mongoose.Schema({
   status: { type: String, required: true, default: 'editing' },
   content: { type: String, required: false },
   comments: [CommentSchema],
-}, {
-  discriminatorKey: 'status',
 });
 
-const Post = mongoose.model('Post', PostSchema);
-
-const PublishedPostSchema = Post.discriminator('published', new mongoose.Schema({
-  claps: { type: Number, default: 0 },
-  comments: [CommentSchema],
-  facebookShares: { type: Number, required: false },
-  linkedinShares: { type: Number, required: false },
-  instagramShares: { type: Number, required: false },
-  twitterShares: { type: Number, required: false },
-  readCount: { type: Number, required: false, default: 0 },
-  tags: { type: [String], required: true },
-  featuredImg: { type: String, required: true },
-  excerpt: { type: String, required: true },
-  content: { type: String, required: false },
-}));
+mongoose.model('Post', PostSchema);
