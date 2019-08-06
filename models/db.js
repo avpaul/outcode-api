@@ -1,14 +1,17 @@
 import mongoose from 'mongoose';
-import './post';
+import ENV from 'dotenv';
+import './articles';
 import './users';
 
-const dbURI = 'mongodb://localhost:27017/outcode';
+ENV.config();
 
-mongoose.connect(dbURI, { useNewUrlParser: true });
+const { DATABASE_URL } = process.env;
 
-mongoose.connection.on('connected', () => console.log(`Mongoose connected to ${dbURI}`));
+mongoose.connect(DATABASE_URL, { useNewUrlParser: true });
+
+mongoose.connection.on('connected', () => console.log(`Mongoose connected to ${DATABASE_URL}`));
 mongoose.connection.on('error', err => console.log(`Mongoose connection error: ${err}`));
-mongoose.connection.on('disconnected', () => console.log(`Mongoose disconnected from ${dbURI}`));
+mongoose.connection.on('disconnected', () => console.log(`Mongoose disconnected from ${DATABASE_URL}`));
 
 // reusable db connection close function
 const gracefulShutdown = (msg, callback) => {

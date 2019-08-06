@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const crypto = require('crypto');
 
 const user = new mongoose.Schema({
+  firstName: { type: String, required: false },
   email: { type: String, required: true, unique: true },
   salt: String,
   hash: String
@@ -17,4 +18,4 @@ user.methods.validatePassword = (password) => {
   return hash === this.hash;
 };
 
-mongoose.model('User', user);
+export default mongoose.model('User', user);
