@@ -19,7 +19,7 @@ function validation(data, res, schema, next) {
   details.forEach((errorDetails) => {
     errors.push(errorDetails.message.replace(/"/g, ''));
   });
-  return res.status(400).json({ errors });
+  return res.status(400).json({ error });
 }
 
 const createOrUpdate = (req, res, next) => {
@@ -33,8 +33,7 @@ const createOrUpdate = (req, res, next) => {
       .required(),
     stickOnFront: Joi.boolean(),
     tags: Joi.array(),
-    featuredImage: Joi.string()
-      .uri(),
+    featuredImage: Joi.string().uri(),
     description: Joi.string()
       .trim()
       .min(50)
@@ -52,10 +51,10 @@ const createOrUpdate = (req, res, next) => {
 
 const slug = (req, res, next) => {
   const schema = {
-    slug: Joi.string.required()
+    slug: Joi.string().required()
   };
   const { slug: articleID } = req.params;
-  validation(articleID, res, schema, next);
+  validation({ slug: articleID }, res, schema, next);
 };
 
 export default {

@@ -40,7 +40,33 @@ const createArticle = async (req, res, next) => {
  * @param {Function} next function to handle errors
  * @returns {Object} res the response objects
  */
-const updateArticle = (req, res, next) => {};
+const updateArticle = async (req, res, next) => {
+  const { slug: oldSlug } = req.params;
+  const { body: articleUpdate } = req;
+  const slug = slugGenerator(articleUpdate.title);
+  const readTime = calculateReadTime(articleUpdate.content);
+  if (articleUpdate.status !== 'draft' || articleUpdate.status !== 'published') {
+    Object.defineProperty(articleUpdate, 'status', { value: 'draft', enumerable: true });
+  }
+  Object.defineProperties(articleUpdate, {
+    slug: { value: slug, enumerable: true },
+    readTime: { value: readTime, enumerable: true },
+    updatedAt: { value: new Date().toUTCString(), enumerable: true }
+  });
+  try {
+    const articleUpdateQuery = await Article.findOneAndUpdate({ slug: oldSlug }, articleUpdate, {
+      new: true
+    });
+    if (articleUpdateQuery === null) {
+      const error = new Error('Article not found');
+      error.status = 400;
+      return next(error);
+    }
+    return res.status(200).json({ data: articleUpdateQuery });
+  } catch (error) {
+    return next(error);
+  }
+};
 
 /**
  *
