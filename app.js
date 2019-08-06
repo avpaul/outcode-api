@@ -1,8 +1,8 @@
 import express from 'express';
 import logger from 'morgan';
 import cors from 'cors';
-import indexRoutes from './routes/index';
 import './models/db';
+import indexRoutes from './routes/index';
 
 const app = express();
 
@@ -23,7 +23,7 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   res.status(err.status || 500).json({
     statusCode: err.status,
-    message: err.message
+    message: err
   });
 });
 

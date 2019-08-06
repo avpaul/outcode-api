@@ -1,6 +1,9 @@
 # node packages directory
 node_modules/
 
+# environment variables
+.env
+
 # vscode editor versioned files and confif files
 .vscode/
 
@@ -12,4 +15,5 @@ node_modules/
 .idea/**/dataSources.ids
 .idea/**/mongoSettings.xml
 
+# misc
 .dbdump/
