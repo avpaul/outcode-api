@@ -12,5 +12,4 @@ node_modules/
 .idea/**/dataSources.ids
 .idea/**/mongoSettings.xml
 
-package-lock.json
-/.dbdump/
+.dbdump/
