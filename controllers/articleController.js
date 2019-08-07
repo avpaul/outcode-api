@@ -45,7 +45,7 @@ const updateArticle = async (req, res, next) => {
   const { body: articleUpdate } = req;
   const slug = slugGenerator(articleUpdate.title);
   const readTime = calculateReadTime(articleUpdate.content);
-  if (articleUpdate.status !== 'draft' || articleUpdate.status !== 'published') {
+  if (articleUpdate.status !== 'draft' && articleUpdate.status !== 'published') {
     Object.defineProperty(articleUpdate, 'status', { value: 'draft', enumerable: true });
   }
   Object.defineProperties(articleUpdate, {
@@ -73,22 +73,40 @@ const updateArticle = async (req, res, next) => {
  * @param {Object} req the request object
  * @param {Object} res the response object
  * @param {Function} next function to handle errors
- * @returns {Object} res the response objects
+ * @returns {Object} response the response objects
  */
-const deleteArticle = (req, res, next) => {};
+const deleteArticle = async (req, res, next) => {
+  const { slug } = req.params;
+  try {
+    const deleteArticleQuery = await Article.findOneAndDelete({ slug });
+    if (deleteArticleQuery === null) {
+      const error = new Error('Article does not exist');
+      error.status = 400;
+      return next(error);
+    }
+    return res.status(204).json();
+  } catch (error) {
+    return next(error);
+  }
+};
 
 /**
  *
  * @param {Object} req the request object
  * @param {Object} res the response object
  * @param {Function} next function to handle errors
- * @returns {Object} res the response objects
+ * @returns {Object} response the response objects
  */
 const getArticle = async (req, res, next) => {
   const { slug } = req.params;
 
   try {
     const articleQuery = await Article.findOne({ slug });
+    if (articleQuery === null) {
+      const error = new Error('Article not found');
+      error.status = 404;
+      return next(error);
+    }
     return res.status(200).json({ data: articleQuery });
   } catch (error) {
     return next(error);
@@ -100,12 +118,72 @@ const getArticle = async (req, res, next) => {
  * @param {Object} req the request object
  * @param {Object} res the response object
  * @param {Function} next function to handle errors
- * @returns {Object} res the response objects
+ * @returns {Object} response the response objects
  */
 const getArticles = async (req, res, next) => {
-  const { page = 0, limit = 6 } = req.query;
+  const { page = 0, limit = 7 } = req.query;
+
   try {
-    const articleQuery = await Article.findOne({});
+    const articleQuery = await Article.find(
+      { status: 'published' },
+      'slug title description featuredImage stickOnFront createdAt',
+      {
+        skip: page * Number(limit),
+        sort: { updatedAt: -1 },
+        limit: Number(limit)
+      }
+    );
+    return res.status(200).json({ data: articleQuery });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+/**
+ *
+ * @param {Object} req the request object
+ * @param {Object} res the response object
+ * @param {Function} next function to handle errors
+ * @returns {Object} response the response objects
+ */
+const getPublished = async (req, res, next) => {
+  const { page = 0, limit = 6 } = req.query;
+
+  try {
+    const articleQuery = await Article.find(
+      { status: 'published' },
+      'slug title description createdAt updatedAt',
+      {
+        skip: page * Number(limit),
+        sort: { updatedAt: -1 },
+        limit: Number(limit)
+      }
+    );
+    return res.status(200).json({ data: articleQuery });
+  } catch (error) {
+    return next(error);
+  }
+};
+/**
+ *
+ * @param {Object} req the request object
+ * @param {Object} res the response object
+ * @param {Function} next function to handle errors
+ * @returns {Object} response the response objects
+ */
+const getDrafts = async (req, res, next) => {
+  const { page = 0, limit = 6 } = req.query;
+
+  try {
+    const articleQuery = await Article.find(
+      { status: 'draft' },
+      'slug title description createdAt updatedAt',
+      {
+        skip: page * Number(limit),
+        sort: { updatedAt: -1 },
+        limit: Number(limit)
+      }
+    );
     return res.status(200).json({ data: articleQuery });
   } catch (error) {
     return next(error);
@@ -127,5 +205,7 @@ export default {
   deleteArticle,
   getArticle,
   getArticles,
-  getArticlesByTag
+  getArticlesByTag,
+  getDrafts,
+  getPublished
 };
