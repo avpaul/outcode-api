@@ -3,14 +3,14 @@ import articleRoutes from './articleRoutes';
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
+router.get('/api/', (req, res) => {
   res.status(200).json({ message: 'Outcode API, Up and running' });
 });
 
-router.get('/test', (req, res) => {
+router.get('/api/test', (req, res) => {
   res.status(200).json({ message: 'Outcode API, Up and running' });
 });
 
-router.use('/', articleRoutes);
+router.use('/api/', articleRoutes);
 
 export default router;

@@ -19,7 +19,7 @@ function validation(data, res, schema, next) {
   details.forEach((errorDetails) => {
     errors.push(errorDetails.message.replace(/"/g, ''));
   });
-  return res.status(400).json({ error });
+  return res.status(400).json({ errors });
 }
 
 const createOrUpdate = (req, res, next) => {
@@ -43,7 +43,6 @@ const createOrUpdate = (req, res, next) => {
       .required(),
     content: Joi.string()
       .trim()
-      .min(500)
       .required()
   };
   validation(req.body, res, schema, next);
