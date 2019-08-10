@@ -1,11 +1,12 @@
 {
+  "compact": false,
   "presets": [
     [
       "@babel/preset-env",
       {
-        "targets": { "node": "current" }
+        "targets": { "node": "12.6.0" }
       }
     ]
   ],
-  "plugins": ["@babel/plugin-syntax-dynamic-import"]
+  "plugins": ["@babel/plugin-syntax-dynamic-import"],
 }

@@ -5,13 +5,13 @@ import './users';
 
 ENV.config();
 
-const { DATABASE_URL } = process.env;
+const { MONGODB_URI } = process.env;
 
-mongoose.connect(DATABASE_URL, { useNewUrlParser: true });
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
 
-mongoose.connection.on('connected', () => console.log(`Mongoose connected to ${DATABASE_URL}`));
+mongoose.connection.on('connected', () => console.log(`Mongoose connected to ${MONGODB_URI}`));
 mongoose.connection.on('error', err => console.log(`Mongoose connection error: ${err}`));
-mongoose.connection.on('disconnected', () => console.log(`Mongoose disconnected from ${DATABASE_URL}`));
+mongoose.connection.on('disconnected', () => console.log(`Mongoose disconnected from ${MONGODB_URI}`));
 
 // reusable db connection close function
 const gracefulShutdown = (msg, callback) => {
