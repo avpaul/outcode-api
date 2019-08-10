@@ -1,8 +1,9 @@
 # node packages directory
 node_modules/
 
-# environment variables
+# environment
 .env
+build/
 
 # vscode editor versioned files and confif files
 .vscode/
