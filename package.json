@@ -14,8 +14,14 @@
   "private": true,
   "scripts": {
     "start": "npm run build && nodemon build/bin/www.js ",
+    "start:nodemon": "nodemon server/bin/www --exec babel-node",
     "serve": "node build/bin/www.js",
-    "build": "rm -rf build && babel ./server -d build --ignore node_modules"
+    "build": "rm -rf build && babel ./server -d build --ignore node_modules",
+    "user": "node build/scripts/createUser.js",
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "bin": {
+    "create-user": "build/scripts/createUser.js"
   },
   "engines": {
     "node": "~12.6.0",
@@ -27,9 +33,11 @@
     "debug": "^4.1.1",
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.6.8",
     "morgan": "^1.9.1",
-    "slug": "^1.1.0"
+    "slug": "^1.1.0",
+    "yargs": "^13.3.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.5",
