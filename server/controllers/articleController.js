@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import slugGenerator from '../helpers/slugGenerator';
+import { slugGenerator, slugCompare } from '../helpers/slugGenerator';
 import calculateReadTime from '../helpers/readTime';
 
 // const User = mongoose.model('User');
@@ -43,7 +43,7 @@ const createArticle = async (req, res, next) => {
 const updateArticle = async (req, res, next) => {
   const { slug: oldSlug } = req.params;
   const { body: articleUpdate } = req;
-  const slug = slugGenerator(articleUpdate.title);
+  const slug = slugCompare(articleUpdate.title, oldSlug);
   const readTime = calculateReadTime(articleUpdate.content);
   if (articleUpdate.status !== 'draft' && articleUpdate.status !== 'published') {
     Object.defineProperty(articleUpdate, 'status', { value: 'draft', enumerable: true });
