@@ -129,7 +129,7 @@ const getArticles = async (req, res, next) => {
       'slug title description featuredImage stickOnFront createdAt',
       {
         skip: page * Number(limit),
-        sort: { updatedAt: -1 },
+        sort: { createdAt: -1 },
         limit: Number(limit)
       }
     );
@@ -155,7 +155,7 @@ const getPublished = async (req, res, next) => {
       'slug title description createdAt updatedAt',
       {
         skip: page * Number(limit),
-        sort: { updatedAt: -1 },
+        sort: { createdAt: -1 },
         limit: Number(limit)
       }
     );
@@ -180,7 +180,7 @@ const getDrafts = async (req, res, next) => {
       'slug title description createdAt updatedAt',
       {
         skip: page * Number(limit),
-        sort: { updatedAt: -1 },
+        sort: { createdAt: -1 },
         limit: Number(limit)
       }
     );
