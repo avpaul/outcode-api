@@ -19,3 +19,4 @@ build/
 # misc
 .dbdump/
 dump.rdb
+.DS_Store

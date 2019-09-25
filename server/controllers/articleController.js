@@ -126,7 +126,7 @@ const getArticles = async (req, res, next) => {
   try {
     const articleQuery = await Article.find(
       { status: 'published' },
-      'slug title description featuredImage stickOnFront createdAt',
+      'slug title description featuredImage stickOnFront createdAt readTime',
       {
         skip: page * Number(limit),
         sort: { createdAt: -1 },
