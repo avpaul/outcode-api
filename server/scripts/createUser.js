@@ -10,15 +10,25 @@ const { argv } = yargs
     'create a new user',
     () => {
       yargs
-        .positional('email', { description: 'email of the new user', type: 'string' })
-        .positional('password', { type: 'string', description: 'password of the new user' })
-        .positional('firstName', { type: 'string', description: 'new user first name' })
-        .positional('lastName', { type: 'string', description: 'new user last name' });
+        .positional('email', {
+          description: 'email of the new user',
+          type: 'string'
+        })
+        .positional('password', {
+          type: 'string',
+          description: 'password of the new user'
+        })
+        .positional('firstName', {
+          type: 'string',
+          description: 'new user first name'
+        })
+        .positional('lastName', {
+          type: 'string',
+          description: 'new user last name'
+        });
     },
-    (argv) => {
-      const {
-        email, password, firstName, lastName
-      } = argv;
+    argv => {
+      const { email, password, firstName, lastName } = argv;
       const user = new User({
         email,
         firstName,
@@ -29,12 +39,12 @@ const { argv } = yargs
       user.setPassword(password);
       user
         .save()
-        .then((data) => {
+        .then(data => {
           // eslint-disable-next-line
           console.log(data);
           process.exit(0);
         })
-        .catch((error) => {
+        .catch(error => {
           // eslint-disable-next-line
           console.log(error);
           process.exit(1);
@@ -45,12 +55,15 @@ const { argv } = yargs
     'delete <email>',
     'delete user',
     () => {
-      yargs.positional('email', { description: 'email of the user to delete', type: 'string' });
+      yargs.positional('email', {
+        description: 'email of the user to delete',
+        type: 'string'
+      });
     },
-    (argv) => {
+    argv => {
       const { email } = argv;
       User.findOneAndDelete({ email })
-        .then((data) => {
+        .then(data => {
           if (!data) {
             // eslint-disable-next-line
             console.log(`User with email: ${email} not found`);
@@ -60,7 +73,7 @@ const { argv } = yargs
           console.log(`User with email: ${email} successfully deleted`);
           process.exit(0);
         })
-        .catch((error) => {
+        .catch(error => {
           // eslint-disable-next-line
           console.log(error);
           process.exit(1);
@@ -72,10 +85,16 @@ const { argv } = yargs
     'change user password',
     () => {
       yargs
-        .positional('email', { description: 'email of the user', type: 'string' })
-        .positional('password', { description: 'new password', type: 'string' });
+        .positional('email', {
+          description: 'email of the user',
+          type: 'string'
+        })
+        .positional('password', {
+          description: 'new password',
+          type: 'string'
+        });
     },
-    (argv) => {
+    argv => {
       const { email, password } = argv;
 
       User.findOne({ email }, (error, user) => {
@@ -97,7 +116,7 @@ const { argv } = yargs
             console.log(`Password successfully updated`);
             process.exit(0);
           })
-          .catch((error) => {
+          .catch(error => {
             // eslint-disable-next-line
             console.log(`Failed to update password \n ${error}`);
             process.exit(1);
