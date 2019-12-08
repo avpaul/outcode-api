@@ -8,10 +8,17 @@ ENV.config();
 const { MONGODB_URI } = process.env;
 
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
+mongoose.set('useCreateIndex', true);
 
-mongoose.connection.on('connected', () => console.log(`Mongoose connected to ${MONGODB_URI}`));
-mongoose.connection.on('error', err => console.log(`Mongoose connection error: ${err}`));
-mongoose.connection.on('disconnected', () => console.log(`Mongoose disconnected from ${MONGODB_URI}`));
+mongoose.connection.on('connected', () =>
+  console.log(`Mongoose connected to ${MONGODB_URI}`)
+);
+mongoose.connection.on('error', err =>
+  console.log(`Mongoose connection error: ${err}`)
+);
+mongoose.connection.on('disconnected', () =>
+  console.log(`Mongoose disconnected from ${MONGODB_URI}`)
+);
 
 // reusable db connection close function
 const gracefulShutdown = (msg, callback) => {

@@ -6,7 +6,20 @@ import indexRoutes from './routes/index';
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    credentials: true,
+    origin: true,
+    allowedHeaders: [
+      'Content-Type',
+      'Accept',
+      'X-Requested-With',
+      'X-HTTP-Method-Override',
+      'Authorization'
+    ]
+  })
+);
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
