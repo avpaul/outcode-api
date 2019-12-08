@@ -42,12 +42,12 @@ const login = (req, res, next) => {
       );
       res.cookie('token', token, {
         expires: new Date(Date.now() + 7776e6),
-        domain: 'localhost',
+        path: '/',
+        domain: process.env.APP_URL,
         httpOnly: true,
-        sameSite: 'strict'
+        secure: true,
+        sameSite: 'None'
       });
-      // TODO: set cookie domain domain: '.outcode.dev'
-      // secure: process.env.NODE_ENV === 'production',
       return res.status(200).json({ message: 'Login successful', token });
     }
     return res.status(400).json({ error: 'email or password incorrect' });

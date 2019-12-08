@@ -20,3 +20,6 @@ build/
 .dbdump/
 dump.rdb
 .DS_Store
+server.csr
+server.key
+server.pass.key

@@ -7,7 +7,10 @@ ENV.config();
 
 const { MONGODB_URI } = process.env;
 
-mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
 mongoose.set('useCreateIndex', true);
 
 mongoose.connection.on('connected', () =>
